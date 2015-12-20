@@ -1,4 +1,14 @@
-/* a lpc decoder. on every out_latch must be read.
+/* a lpc decoder
+ * lpc signals:
+	* lpc_ad: 4 data lines
+	* lpc_frame: frame to start a new transaction
+	* lpc_reset: reset line
+ * output signals:
+	* out_mode: 1 for i/o, 0 for memory
+	* out_direction: for write, 0 for read
+        * out_addr: 16-bit address
+        * out_data: data read or written (1byte)
+	* out_clock: on rising edge all data must read. on multibyte transaction on every completed byte clock latched.
  */
 
 module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_direction, out_addr, out_data, out_clock);
@@ -38,13 +48,13 @@ module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_directio
 	begin
 		if (lpc_reset) begin
 			state <= reset;
-			out_clock <= 0;
 		end
 		else begin
 			case (state)
 				// wait for start segment
 				reset: begin
 					if (lpc_frame == 1'b1 && lpc_ad == 4'b0000) begin
+						out_clock <= 0;
 						state <= start;
 					end
 				end
