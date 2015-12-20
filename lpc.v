@@ -26,8 +26,8 @@ module lpc_proto(lpc_ad, lpc_clk, lpc_frame, lpc_reset, out_mode, out_direction,
 	/* 1 for i/o, 0 for memory */
 	wire mode;
 
-	wire [3:0] addr;
-	wire [3:0] data;
+	wire [15:0] addr;
+	wire [7:0] data;
 
 	always @(posedge lpc_clk or posedge lpc_reset)
 	begin
@@ -66,13 +66,13 @@ module lpc_proto(lpc_ad, lpc_clk, lpc_frame, lpc_reset, out_mode, out_direction,
 					else begin
 						case (counter)
 							0:
-								addr[15:12] <= lpc_ad[3:0];
+								addr[15:12] <= lpc_ad;
 							1:
-								addr[11:8] <= lpc_ad[3:0];
+								addr[11:8] <= lpc_ad;
 							2:
-								addr[7:4] <= lpc_ad[3:0];
+								addr[7:4] <= lpc_ad;
 							3:
-								addr[3:0] <= lpc_ad[3:0];
+								addr[3:0] <= lpc_ad;
 						endcase
 						counter <= counter + 1;
 					end
