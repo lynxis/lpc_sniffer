@@ -1,6 +1,9 @@
-module lpc_proto(lpc_ad, lpc_clk, lpc_frame, lpc_reset, out_mode, out_direction, out_addr, out_data);
+/* a lpc decoder. on every out_latch must be read.
+ */
+
+module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_direction, out_addr, out_data, out_clock);
 	input [3:0] lpc_ad;
-	input lpc_clk;
+	input lpc_clock;
 	input lpc_frame;
 	input lpc_reset;
 
@@ -12,6 +15,8 @@ module lpc_proto(lpc_ad, lpc_clk, lpc_frame, lpc_reset, out_mode, out_direction,
 	/* addr + data written or read */
 	output [15:0] out_addr;
 	output [7:0] out_data;
+
+	output out_clock;
 
 	/* state machine */
 	reg [3:0] state;
@@ -29,10 +34,11 @@ module lpc_proto(lpc_ad, lpc_clk, lpc_frame, lpc_reset, out_mode, out_direction,
 	wire [15:0] addr;
 	wire [7:0] data;
 
-	always @(posedge lpc_clk or posedge lpc_reset)
+	always @(posedge lpc_clock or posedge lpc_reset)
 	begin
 		if (lpc_reset) begin
 			state <= reset;
+			out_clock <= 0;
 		end
 		else begin
 			case (state)
@@ -97,6 +103,7 @@ module lpc_proto(lpc_ad, lpc_clk, lpc_frame, lpc_reset, out_mode, out_direction,
 				io_data: begin
 					if (counter >= 2) begin
 						state <= reset;
+						out_clock <= 1;
 					end
 					else begin
 						case (counter)
