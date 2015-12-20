@@ -4,20 +4,34 @@ module lpc_proto(lpc_ad, lpc_clk, lpc_frame, lpc_reset, out_mode, out_direction,
 	input lpc_frame;
 	input lpc_reset;
 
+	/* 1 for i/o, 0 for memory */
+	output out_mode;
+	/* 1 for write, 0 for read */
+	output out_direction;
+
+	/* addr + data written or read */
+	output [15:0] out_addr;
+	output [7:0] out_data;
+
+	/* state machine */
 	reg [3:0] state;
+	parameter reset = 4'h1, start = 4'h2, address = 4'h3, tar = 4'h4, sync = 4'h5, io_data = 4'h6;
+
+	/* counter used by some states */
 	reg [3:0] counter;
 
-	parameter reset = 4'h1, start = 4'h2, address = 4'h3;
+	/* 1 for write, 0 for read */
+	wire direction;
 
-	// 0 = read, 1 = write
-	wire write;
+	/* 1 for i/o, 0 for memory */
+	wire mode;
 
-	// type of operation
-	wire io;
+	wire [3:0] addr;
+	wire [3:0] data;
 
-	always @(posedge lpc_clk or posedge lpc_rst)
+	always @(posedge lpc_clk or posedge lpc_reset)
 	begin
-		if (lpc_rst) begin
+		if (lpc_reset) begin
 			state <= reset;
 		end
 		else begin
@@ -32,8 +46,8 @@ module lpc_proto(lpc_ad, lpc_clk, lpc_frame, lpc_reset, out_mode, out_direction,
 				// read out mode (i/o memory dma)
 				start: begin
 					if (lpc_ad[3:2] == 1'b00) begin
-						io <= 1'b1;
-						write <= lpc_ad[1];
+						mode <= 1'b1;
+						direction <= lpc_ad[1];
 						state <= address;
 						counter <= 4'b0;
 					end
@@ -52,13 +66,13 @@ module lpc_proto(lpc_ad, lpc_clk, lpc_frame, lpc_reset, out_mode, out_direction,
 					else begin
 						case (counter)
 							0:
-								address[15:12] <= lpc_ad[3:0];
+								addr[15:12] <= lpc_ad[3:0];
 							1:
-								address[11:8] <= lpc_ad[3:0];
+								addr[11:8] <= lpc_ad[3:0];
 							2:
-								address[7:4] <= lpc_ad[3:0];
+								addr[7:4] <= lpc_ad[3:0];
 							3:
-								address[3:0] <= lpc_ad[3:0];
+								addr[3:0] <= lpc_ad[3:0];
 						endcase
 						counter <= counter + 1;
 					end
@@ -75,7 +89,7 @@ module lpc_proto(lpc_ad, lpc_clk, lpc_frame, lpc_reset, out_mode, out_direction,
 				end
 
 				sync: begin
-					if (lpc_add <= 1'b0000) begin
+					if (lpc_ad == 1'b0000) begin
 						state <= io_data;
 					end
 				end
@@ -97,4 +111,8 @@ module lpc_proto(lpc_ad, lpc_clk, lpc_frame, lpc_reset, out_mode, out_direction,
 			endcase
 		end
 	end
+	assign out_mode = mode;
+	assign out_direction = direction;
+	assign out_data = data;
+	assign out_addr = addr;
 endmodule
