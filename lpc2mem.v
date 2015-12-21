@@ -28,51 +28,44 @@ module lpc2mem(
 		write_data = 3'h5,
 		idle = 3'h7;
 
-	always @(posedge lpc_latch)
-	begin
-		buffer_lpc_addr <= lpc_addr;
-		buffer_lpc_data <= lpc_data;
-		buffer_lpc_cyctype_dir <= lpc_cyctype_dir;
-		buffer_target_addr <= target_addr;
-		counter <= write_type;
-	end
-
-	always @(posedge clock)
-	begin
-		if (~lpc_latch) begin
-			case (counter)
-				write_type: begin
-					data [3:0] <= buffer_lpc_cyctype_dir;
-					data [7:4] <= 4'h0;
-					write_clk <= 1;
-				end
-				write_addr_0: begin
-					data <= buffer_lpc_addr[31:24];
-					write_clk <= 1;
-				end
-				write_addr_1: begin
-					data <= buffer_lpc_addr[23:16];
-					write_clk <= 1;
-				end
-				write_addr_2: begin
-					data <= buffer_lpc_addr[15:8];
-					write_clk <= 1;
-				end
-				write_addr_3: begin
-					data <= buffer_lpc_addr[7:0];
-					write_clk <= 1;
-				end
-				write_data: begin
-					data <= buffer_lpc_data;
-					write_clk <= 1;
-				end
-			endcase
-			counter <= counter + 1;
+	always @(clock or lpc_latch) begin
+		if (lpc_latch) begin
+			buffer_lpc_addr <= lpc_addr;
+			buffer_lpc_data <= lpc_data;
+			buffer_lpc_cyctype_dir <= lpc_cyctype_dir;
+			buffer_target_addr <= target_addr;
+			counter <= write_type;
 		end
+		else
+			if (clock)
+			begin
+				case (counter)
+					write_type: begin
+						data [3:0] <= buffer_lpc_cyctype_dir;
+						data [7:4] <= 4'h0;
+					end
+					write_addr_0: begin
+						data <= buffer_lpc_addr[31:24];
+					end
+					write_addr_1: begin
+						data <= buffer_lpc_addr[23:16];
+					end
+					write_addr_2: begin
+						data <= buffer_lpc_addr[15:8];
+					end
+					write_addr_3: begin
+						data <= buffer_lpc_addr[7:0];
+					end
+					write_data: begin
+						data <= buffer_lpc_data;
+					end
+				endcase
+				write_clk <= 1;
+				counter <= counter + 1;
+			end
+			else
+				write_clk <= 0;
 	end
-
-	always @(negedge clock)
-		ram_write_clk <= 0;
 
 	assign ram_addr [7:3] = buffer_target_addr;
 	assign ram_addr [2:0] = counter;
