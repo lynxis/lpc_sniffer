@@ -23,7 +23,7 @@ module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_directio
 	output out_direction;
 
 	/* addr + data written or read */
-	output [15:0] out_addr;
+	output [31:0] out_addr;
 	output [7:0] out_data;
 
 	output out_clock;
@@ -41,7 +41,7 @@ module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_directio
 	/* 1 for i/o, 0 for memory */
 	wire mode;
 
-	wire [15:0] addr;
+	wire [31:0] addr;
 	wire [7:0] data;
 
 	always @(posedge lpc_clock or posedge lpc_reset)
