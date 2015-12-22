@@ -22,11 +22,13 @@ To syncronize between lpc and usb it used a internal ring-buffer. The internal m
 
 - all 5 leds
 - pmod 2x6 (digilent connector)
+```
 	lpc_ad[0] 1 7  reserved
 	lpc_ad[1] 2 8  lpc_reset
 	lpc_ad[2] 3 9  lpc_frame
 	lpc_ad[3] 4 10 lpc_clock
 	GND       5 11 GND
 	3.3V      6 12 3.3V
+```
 - uart output over the ftdi
 
