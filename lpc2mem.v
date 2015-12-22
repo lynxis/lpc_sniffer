@@ -9,7 +9,7 @@ module lpc2mem(
 	input [4:0] target_addr, /* write next lpc frame into this addr (5bit higher bit of a 8bit addr) */
 	output [7:0] ram_addr, /* write data to this addr */
 	output [7:0] ram_data, /* write data to this data */
-	output ram_write_clk); /* on high write out data */
+	output ram_write_clock); /* on high write out data */
 
 	/* to which we write the addr */
 	reg [31:0] buffer_lpc_addr;
@@ -19,7 +19,7 @@ module lpc2mem(
 
 	reg [7:0] data;
 
-	wire write_clk;
+	wire write_clock;
 
 	/* we need to save 8 byte */
 	reg [2:0] counter;
@@ -60,15 +60,15 @@ module lpc2mem(
 						data <= buffer_lpc_data;
 					end
 				endcase
-				write_clk <= 1;
+				write_clock <= 1;
 				counter <= counter + 1;
 			end
 			else
-				write_clk <= 0;
+				write_clock <= 0;
 	end
 
 	assign ram_addr [7:3] = buffer_target_addr;
 	assign ram_addr [2:0] = counter;
 	assign ram_data = data;
-	assign ram_write_clk = write_clk;
+	assign ram_write_clock = write_clock;
 endmodule
