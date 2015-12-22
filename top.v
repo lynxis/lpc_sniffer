@@ -88,7 +88,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.read_addr(read_addr),
 		.target_addr(upper_read_addr),
 		.read_done(read_done),
-		.uart_read(uart_ready),
+		.uart_ready(uart_ready),
 		.uart_data(uart_data));
 
 	uart_tx #(.CLOCK_FREQ(CLOCK_FREQ), .BAUD_RATE(BAUD_RATE))
