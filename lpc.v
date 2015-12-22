@@ -1,8 +1,8 @@
 /* a lpc decoder
  * lpc signals:
 	* lpc_ad: 4 data lines
-	* lpc_frame: frame to start a new transaction
-	* lpc_reset: reset line
+	* lpc_frame: frame to start a new transaction. active low
+	* lpc_reset: reset line. active low
  * output signals:
 	* out_mode: 1 for i/o, 0 for memory
 	* out_direction: for write, 0 for read
@@ -44,16 +44,16 @@ module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_directio
 	wire [31:0] addr;
 	wire [7:0] data;
 
-	always @(posedge lpc_clock or posedge lpc_reset)
+	always @(posedge lpc_clock or negedge lpc_reset)
 	begin
-		if (lpc_reset) begin
+		if (~lpc_reset) begin
 			state <= reset;
 		end
 		else begin
 			case (state)
 				// wait for start segment
 				reset: begin
-					if (lpc_frame == 1'b1 && lpc_ad == 4'b0000) begin
+					if (~lpc_frame && lpc_ad == 4'b0000) begin
 						out_clock <= 0;
 						state <= start;
 					end
