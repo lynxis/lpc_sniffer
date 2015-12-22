@@ -14,7 +14,7 @@ module buffer #(parameter AW = 16, parameter DW = 8)
 	reg [DW-1: 0] ram [0: NPOS-1];
 
 	always @(posedge write_clock)
-		write_data <= ram[write_addr];
+		ram[write_addr] <= write_data;
 
 	always @(read_addr)
 		read_data <= ram[read_addr];
