@@ -8,10 +8,10 @@
 	* out_direction: for write, 0 for read
         * out_addr: 16-bit address
         * out_data: data read or written (1byte)
-	* out_clock: on rising edge all data must read. on multibyte transaction on every completed byte clock latched.
+	* out_latch: on rising edge all data must read.
  */
 
-module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_direction, out_addr, out_data, out_clock);
+module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_direction, out_addr, out_data, out_latch);
 	input [3:0] lpc_ad;
 	input lpc_clock;
 	input lpc_frame;
@@ -26,7 +26,7 @@ module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_directio
 	output [31:0] out_addr;
 	output [7:0] out_data;
 
-	output out_clock;
+	output out_latch;
 
 	/* state machine */
 	reg [3:0] state;
@@ -54,7 +54,7 @@ module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_directio
 				// wait for start segment
 				reset: begin
 					if (~lpc_frame && lpc_ad == 4'b0000) begin
-						out_clock <= 0;
+						out_latch <= 0;
 						state <= start;
 					end
 				end
@@ -113,7 +113,7 @@ module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_directio
 				io_data: begin
 					if (counter >= 2) begin
 						state <= reset;
-						out_clock <= 1;
+						out_latch <= 1;
 					end
 					else begin
 						case (counter)
