@@ -4,23 +4,20 @@
 	* lpc_frame: frame to start a new transaction. active low
 	* lpc_reset: reset line. active low
  * output signals:
-	* out_mode: 1 for i/o, 0 for memory
-	* out_direction: for write, 0 for read
+	* out_cyctype_dir: type and direction. same as in LPC Spec 1.1
         * out_addr: 16-bit address
         * out_data: data read or written (1byte)
 	* out_latch: on rising edge all data must read.
  */
 
-module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_direction, out_addr, out_data, out_latch);
+module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_cyctype_dir, out_addr, out_data, out_latch);
 	input [3:0] lpc_ad;
 	input lpc_clock;
 	input lpc_frame;
 	input lpc_reset;
 
-	/* 1 for i/o, 0 for memory */
-	output out_mode;
-	/* 1 for write, 0 for read */
-	output out_direction;
+	/* type and direction. same as in LPC Spec 1.1 */
+	output [3:0] out_cyctype_dir;
 
 	/* addr + data written or read */
 	output [31:0] out_addr;
@@ -35,11 +32,8 @@ module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_directio
 	/* counter used by some states */
 	reg [3:0] counter;
 
-	/* 1 for write, 0 for read */
-	wire direction;
-
-	/* 1 for i/o, 0 for memory */
-	wire mode;
+	/* mode + direction. same as in LPC Spec 1.1 */
+	reg [3:0] cyctype_dir;
 
 	wire [31:0] addr;
 	wire [7:0] data;
@@ -61,9 +55,9 @@ module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_directio
 
 				// read out mode (i/o memory dma)
 				start: begin
+					cyctype_dir <= lpc_ad;
+
 					if (lpc_ad[3:2] == 1'b00) begin
-						mode <= 1'b1;
-						direction <= lpc_ad[1];
 						state <= address;
 						counter <= 4'b0;
 					end
@@ -128,8 +122,7 @@ module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_mode, out_directio
 			endcase
 		end
 	end
-	assign out_mode = mode;
-	assign out_direction = direction;
+	assign out_cyctype_dir = cyctype_dir;
 	assign out_data = data;
 	assign out_addr = addr;
 endmodule
