@@ -1,5 +1,6 @@
 module mem2serial #(parameter AW = 16)
 	(
+		output read_clock,
 		input [7:0] read_data,
 		output [AW-1:0] read_addr,
 		input [AW-1-3:0] target_addr,
@@ -21,6 +22,7 @@ module mem2serial #(parameter AW = 16)
 		if (~reset) begin
 			state <= idle;
 			uart_latch <= 0;
+			read_clock <= 0;
 		end
 		else
 			case (state)
