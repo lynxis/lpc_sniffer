@@ -6,6 +6,7 @@ module buffer #(parameter AW = 16, parameter DW = 8)
 		input [DW-1:0] write_data,
 		input [AW-1:0] write_addr,
 
+		input read_clock,
 		output [DW-1:0] read_data,
 		input [AW-1:0] read_addr);
 
@@ -16,6 +17,6 @@ module buffer #(parameter AW = 16, parameter DW = 8)
 	always @(posedge write_clock)
 		ram[write_addr] <= write_data;
 
-	always @(read_addr)
+	always @(posedge read_clock)
 		read_data <= ram[read_addr];
 endmodule
