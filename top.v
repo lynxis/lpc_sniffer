@@ -65,7 +65,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.ram_data(write_data),
 		.ram_write_clock(write_latch));
 
-	buffer #(.AW(16), .DW(8))
+	buffer #(.AW(8), .DW(8))
 		MEM (
 			.write_clock(write_latch),
 			.write_data(write_data),
