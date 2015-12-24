@@ -57,9 +57,9 @@ module lpc(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_cyctype_dir, out_addr, o
 				start: begin
 					cyctype_dir <= lpc_ad;
 
-					if (lpc_ad[3:2] == 1'b00) begin
+					if (lpc_ad[3:2] == 2'b00) begin
 						state <= address;
-						counter <= 4'b0;
+						counter <= 0;
 					end
 					else begin
 						// unsupported mode, ignore
@@ -99,7 +99,7 @@ module lpc(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_cyctype_dir, out_addr, o
 				end
 
 				sync: begin
-					if (lpc_ad == 1'b0000) begin
+					if (lpc_ad == 4'b0000) begin
 						state <= io_data;
 					end
 				end
