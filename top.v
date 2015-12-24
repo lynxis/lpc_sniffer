@@ -44,7 +44,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 
 	/* memory -> mem2serial */
 
-	LPC_PROTO lpc_proto(
+	lpc_proto LPC_PROTO(
 		.lpc_ad(lpc_ad),
 		.lpc_clock(lpc_clock),
 		.lpc_frame(lpc_frame),
@@ -54,7 +54,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.out_data(dec_data),
 		.out_latch(dec_latch));
 
-	LPC2MEM lpc2mem(
+	lpc2mem LPC_MEM(
 		.lpc_cyctype_dir(dec_cyctype_dir),
 		.lpc_addr(dec_addr),
 		.lpc_data(dec_data),
@@ -85,7 +85,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 			.empty(empty),
 			.overflow(overflow));
 
-	MEM_SERIAL mem2serial(
+	mem2serial MEM_SERIAL(
 		.read_clock(read_latch),
 		.read_data(read_data),
 		.read_addr(read_addr),
