@@ -44,7 +44,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 
 	/* memory -> mem2serial */
 
-	lpc_proto LPC_PROTO(
+	lpc LPC(
 		.lpc_ad(lpc_ad),
 		.lpc_clock(lpc_clock),
 		.lpc_frame(lpc_frame),

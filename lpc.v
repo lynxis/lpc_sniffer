@@ -10,7 +10,7 @@
 	* out_latch: on rising edge all data must read.
  */
 
-module lpc_proto(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_cyctype_dir, out_addr, out_data, out_latch);
+module lpc(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_cyctype_dir, out_addr, out_data, out_latch);
 	input [3:0] lpc_ad;
 	input lpc_clock;
 	input lpc_frame;
