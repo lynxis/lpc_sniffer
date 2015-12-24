@@ -96,8 +96,10 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 
 	uart_tx #(.CLOCK_FREQ(CLOCK_FREQ), .BAUD_RATE(BAUD_RATE))
 		SERIAL (
+			.read_data(uart_data),
+			.read_latch(uart_latch),
+			.reset(reset),
 			.ready(uart_ready),
-			.data(uart_data),
 			.tx(uart_tx),
 			.clock(ext_clock));
 
