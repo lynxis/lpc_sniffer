@@ -1,5 +1,5 @@
 
-module uart_tx #(parameter CLOCK = 12_000_000, BAUDRATE = 115_200)
+module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 	(
 	input clock,
 	input [7:0] read_data,
@@ -11,7 +11,7 @@ module uart_tx #(parameter CLOCK = 12_000_000, BAUDRATE = 115_200)
 
 	reg [7:0] data;
 
-	localparam CLOCKS_PER_BIT = CLOCK / BAUDRATE;
+	localparam CLOCKS_PER_BIT = CLOCK_FREQ / BAUD_RATE;
 	reg [6:0] divider;
 
 	reg [7:0] counter;
