@@ -1,6 +1,6 @@
 /* dual port memory */
 
-module buffer #(parameter AW = 16, parameter DW = 8)
+module buffer #(parameter AW = 8, parameter DW = 8)
 	(
 		input write_clock,
 		input [DW-1:0] write_data,
