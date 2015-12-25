@@ -10,7 +10,8 @@ module lpc2mem(
 	input [4:0] target_addr, /* write next lpc frame into this addr (5bit higher bit of a 8bit addr) */
 	output reg [7:0] ram_addr, /* write data to this addr */
 	output reg [7:0] ram_data, /* write data to this data */
-	output reg ram_write_clock); /* on high write out data */
+	output reg ram_write_clock, /* on high write out data */
+	output reg lpc_frame_done); /* called when a full lpc frame was written, required for the ringbuffer */
 
 	/* to which we write the addr */
 	reg [31:0] buffer_lpc_addr;
@@ -53,7 +54,9 @@ module lpc2mem(
 				counter <= write_type;
 		else
 				case (counter)
-					idle: begin end
+					idle: begin
+						lpc_frame_done <= 0;
+					end
 					write_type: begin
 						counter <= write_addr_0;
 						ram_data [3:0] <= buffer_lpc_cyctype_dir;
@@ -78,6 +81,7 @@ module lpc2mem(
 					write_data: begin
 						counter <= idle;
 						ram_data <= buffer_lpc_data;
+						lpc_frame_done <= 1;
 					end
 					default: begin end
 				endcase
