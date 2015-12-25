@@ -14,6 +14,9 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 
 	wire uart_tx;
 
+	/* power on reset */
+	wire reset;
+
 	/* lpc -> lpc2mem */
 	wire dec_cyctype_dir;
 	wire [31:0] dec_addr;
@@ -42,7 +45,9 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	wire uart_ready;
 	wire [7:0] uart_data;
 
-	/* memory -> mem2serial */
+	power_on_reset POR(
+		.clock(ext_clock),
+		.reset(reset));
 
 	lpc LPC(
 		.lpc_ad(lpc_ad),
