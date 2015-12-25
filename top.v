@@ -18,13 +18,13 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	wire reset;
 
 	/* lpc -> lpc2mem */
-	wire dec_cyctype_dir;
+	wire [3:0] dec_cyctype_dir;
 	wire [31:0] dec_addr;
 	wire [7:0] dec_data;
 	wire dec_latch;
 
 	/* lpc2mem -> memory */
-	wire [15:0] write_addr;
+	wire [7:0] write_addr;
 	wire [7:0] write_data;
 	wire write_latch;
 
@@ -37,13 +37,15 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	wire overflow;
 
 	/* mem2serial */
-	wire [31:0] read_addr;
+	wire [7:0] read_addr;
 	wire [7:0] read_data;
 	wire read_latch;
 
 	/* uart tx */
 	wire uart_ready;
 	wire [7:0] uart_data;
+	wire uart_latch;
+	wire uart_clock;
 
 	power_on_reset POR(
 		.clock(ext_clock),
@@ -60,6 +62,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.out_latch(dec_latch));
 
 	lpc2mem LPC_MEM(
+		.reset(reset),
 		.lpc_cyctype_dir(dec_cyctype_dir),
 		.lpc_addr(dec_addr),
 		.lpc_data(dec_data),
@@ -68,7 +71,8 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.target_addr(upper_write_addr),
 		.ram_addr(write_addr),
 		.ram_data(write_data),
-		.ram_write_clock(write_latch));
+		.ram_write_clock(write_latch),
+		.lpc_frame_done(write_done));
 
 	buffer #(.AW(8), .DW(8))
 		MEM (
@@ -83,7 +87,8 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	 * to save 6 bytes, 2 byte are wasted */
 	ringbuffer #(.BITS(5))
 		RINGBUFFER (
-			.write_done(write_latch),
+			.reset(reset),
+			.write_done(write_done),
 			.read_done(read_done),
 			.write_addr(upper_write_addr),
 			.read_addr(upper_read_addr),
@@ -91,11 +96,15 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 			.overflow(overflow));
 
 	mem2serial MEM_SERIAL(
+		.reset(reset),
+		.clock(ext_clock),
+		.read_empty(empty),
 		.read_clock(read_latch),
 		.read_data(read_data),
 		.read_addr(read_addr),
 		.target_addr(upper_read_addr),
 		.read_done(read_done),
+		.uart_latch(uart_latch),
 		.uart_ready(uart_ready),
 		.uart_data(uart_data));
 
@@ -106,12 +115,12 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 			.reset(reset),
 			.ready(uart_ready),
 			.tx(uart_tx),
-			.clock(ext_clock));
+			.clock(ext_clock),
+			.uart_clock(uart_clock));
 
 	assign lpc_clock_led = lpc_clock;
 	assign lpc_frame_led = ~lpc_frame;
 	assign lpc_reset_led = ~lpc_reset;
 	assign uart_tx_led = uart_tx;
-	assign uart_tx = uart_tx;
 	assign overflow_led = overflow;
 endmodule
