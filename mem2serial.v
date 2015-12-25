@@ -1,4 +1,4 @@
-module mem2serial #(parameter AW = 16)
+module mem2serial #(parameter AW = 8)
 	(
 		output read_clock,
 		input [7:0] read_data,
@@ -13,10 +13,12 @@ module mem2serial #(parameter AW = 16)
 		output [7:0] uart_data,
 		output uart_latch);
 
-	parameter idle = 3'h0, start_byte_1 = 3'h1, start_byte_2 = 3'h2,
-		  read_lpc_memory = 3'h3;
+	parameter idle = 0,
+		start_byte_1 = 1, complete_tx_start_byte_1 = 2,
+		start_byte_2 = 3, complete_tx_start_byte_2 = 4,
+		read_lpc_memory = 5, complete_tx_read_lpc_memory = 6;
 	reg [2:0] state;
-	reg [3:0] lower_addr;
+	reg [2:0] lower_addr;
 
 	always @(negedge reset or posedge clock) begin
 		if (~reset) begin
@@ -34,28 +36,46 @@ module mem2serial #(parameter AW = 16)
 					end
 				end
 				start_byte_1: begin
-					uart_data <= 8'hff;
-					state <= start_byte_2;
-					uart_latch <= 1;
+					if (uart_ready)
+						uart_data <= 8'hff;
+						state <= complete_tx_start_byte_1;
+						uart_latch <= 1;
+				end
+				complete_tx_start_byte_1: begin
+					if (~uart_ready) begin
+						state <= start_byte_2;
+						uart_latch <= 0;
+					end
 				end
 				start_byte_2: begin
-					uart_data <= 8'hff;
-					state <= read_lpc_memory;
-					uart_latch <= 1;
+					if (uart_ready) begin
+						uart_data <= 8'hff;
+						state <= complete_tx_start_byte_2;
+						uart_latch <= 1;
+					end
+				end
+				complete_tx_start_byte_2: begin
+					if (~uart_ready) begin
+						state <= read_lpc_memory;
+						uart_latch <= 0;
+					end
 				end
 				read_lpc_memory: begin
-					if (uart_latch)
+					if (lower_addr > 6) begin
+						state <= idle; /* finished lpc frame */
+						read_done <= 1;
+					end
+					else if (uart_ready) begin
+						uart_data <= read_data;
+						uart_latch <= 1;
+						state <= complete_tx_read_lpc_memory;
+					end
+				end
+				complete_tx_read_lpc_memory: begin
+					if (~uart_ready) begin
+						state <= read_lpc_memory; /* last state check in read_lpc_memory */
 						uart_latch <= 0;
-					else begin
-						if (lower_addr > 6) begin
-							state <= idle;
-							read_done <= 1;
-						end
-						else begin
-							lower_addr <= lower_addr + 1;
-							uart_data <= read_data;
-							uart_latch <= 1;
-						end
+						lower_addr <= lower_addr + 1;
 					end
 				end
 			endcase
@@ -63,5 +83,4 @@ module mem2serial #(parameter AW = 16)
 
 	assign read_addr[2:0] = lower_addr;
 	assign read_addr[AW-1:3] = target_addr;
-	assign uart_latch = uart_latch;
 endmodule
