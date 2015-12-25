@@ -26,8 +26,8 @@ module lpc(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_cyctype_dir, out_addr, o
 	output out_latch;
 
 	/* state machine */
-	reg [3:0] state;
-	parameter reset = 4'h1, start = 4'h2, address = 4'h3, tar = 4'h4, sync = 4'h5, io_data = 4'h6;
+	reg [2:0] state;
+	localparam reset = 1, start = 2, address = 3, tar = 4, sync = 5, io_data = 6;
 
 	/* counter used by some states */
 	reg [3:0] counter;
