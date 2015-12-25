@@ -19,8 +19,6 @@ module lpc2mem(
 	reg [3:0] buffer_lpc_cyctype_dir;
 	reg [4:0] buffer_target_addr;
 
-	reg new_data;
-
 	/* we need to save 8 byte */
 	reg [2:0] counter;
 	parameter write_type = 3'h0,
