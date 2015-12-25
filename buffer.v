@@ -7,7 +7,7 @@ module buffer #(parameter AW = 8, parameter DW = 8)
 		input [AW-1:0] write_addr,
 
 		input read_clock,
-		output [DW-1:0] read_data,
+		output reg [DW-1:0] read_data,
 		input [AW-1:0] read_addr);
 
 	localparam NPOS = 2 ** AW;
