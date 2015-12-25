@@ -14,10 +14,8 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 	localparam CLOCKS_PER_BIT = CLOCK_FREQ / BAUD_RATE;
 	reg [6:0] divider;
 
-	reg [7:0] counter;
-
 	reg new_data;
-	reg [1:0] state;
+	reg [2:0] state;
 	reg [2:0] bit_pos; /* which is the next bit we transmit */
 	reg parity;
 
@@ -25,7 +23,7 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 
 	always @(posedge clock) begin
 		if (divider >= CLOCKS_PER_BIT) begin
-			divider = 0;
+			divider <= 0;
 			uart_clock <= ~uart_clock;
 		end
 	end
@@ -45,7 +43,7 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 
 	always @(posedge uart_clock or negedge reset) begin
 		if (~reset) begin
-			ready <= 1;
+			ready <= 0;
 			state <= IDLE;
 		end
 		else begin
@@ -57,6 +55,8 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 						ready <= 0;
 						state <= START_BIT;
 					end
+					else
+						ready <= 1;
 				end
 				START_BIT: begin
 					tx <= 0;
@@ -72,7 +72,7 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 					if (bit_pos == 7)
 						state <= PARITY;
 					else
-						bit_pos = bit_pos + 1;
+						bit_pos <= bit_pos + 1;
 				end
 
 				PARITY: begin
@@ -84,6 +84,7 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 					tx <= 1;
 					state <= IDLE;
 				end
+				default: begin end
 			endcase
 		end
 	end
