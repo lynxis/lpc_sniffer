@@ -40,10 +40,11 @@ module lpc(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_cyctype_dir, out_addr, o
 
 	always @(posedge lpc_clock or negedge lpc_reset)
 	begin
-		addr[31:16] <= 0; /* still unsused - memory mode requires these bits */
+		addr[31:16] <= 0; /* still unused - memory mode requires these bits */
 
 		if (~lpc_reset) begin
 			state <= reset;
+			addr <= 0;
 		end
 		else begin
 			case (state)
