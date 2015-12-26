@@ -8,7 +8,7 @@ module lpc2mem(
 	input clock, /* external clock, could connected to (lpc clock / 2) */
 	input reset,
 	input [4:0] target_addr, /* write next lpc frame into this addr (5bit higher bit of a 8bit addr) */
-	output reg [7:0] ram_addr, /* write data to this addr */
+	output [7:0] ram_addr, /* write data to this addr */
 	output reg [7:0] ram_data, /* write data to this data */
 	output reg ram_write_clock, /* on high write out data */
 	output reg lpc_frame_done); /* called when a full lpc frame was written, required for the ringbuffer */

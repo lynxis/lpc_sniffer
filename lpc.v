@@ -23,7 +23,7 @@ module lpc(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_cyctype_dir, out_addr, o
 	output [31:0] out_addr;
 	output [7:0] out_data;
 
-	output out_latch;
+	output reg out_latch;
 
 	/* state machine */
 	reg [2:0] state;
@@ -35,8 +35,8 @@ module lpc(lpc_ad, lpc_clock, lpc_frame, lpc_reset, out_cyctype_dir, out_addr, o
 	/* mode + direction. same as in LPC Spec 1.1 */
 	reg [3:0] cyctype_dir;
 
-	wire [31:0] addr;
-	wire [7:0] data;
+	reg [31:0] addr;
+	reg [7:0] data;
 
 	always @(posedge lpc_clock or negedge lpc_reset)
 	begin

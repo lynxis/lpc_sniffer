@@ -5,9 +5,9 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 	input [7:0] read_data,
 	input read_latch, /* on posedge new data are read */
 	input reset, /* active low */
-	output ready, /* ready to read new data */
-	output tx,
-	output uart_clock);
+	output reg ready, /* ready to read new data */
+	output reg tx,
+	output reg uart_clock);
 
 	reg [7:0] data;
 

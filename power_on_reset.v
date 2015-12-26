@@ -1,4 +1,4 @@
-module power_on_reset(input clock, output reset);
+module power_on_reset(input clock, output reg reset);
 
 reg [7:0] counter = 254;
 

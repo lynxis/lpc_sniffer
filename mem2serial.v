@@ -1,17 +1,17 @@
 module mem2serial #(parameter AW = 8)
 	(
-		output read_clock,
+		output reg read_clock,
 		input [7:0] read_data,
 		output [AW-1:0] read_addr,
 		input [AW-1-3:0] target_addr,
-		output read_done,
+		output reg read_done,
 		input read_empty,
 		input reset,
 		input clock,
 
 		input uart_ready,
-		output [7:0] uart_data,
-		output uart_latch);
+		output reg [7:0] uart_data,
+		output reg uart_latch);
 
 	parameter idle = 0,
 		start_byte_1 = 1, complete_tx_start_byte_1 = 2,
