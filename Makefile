@@ -8,5 +8,5 @@ $(NAME).bin: $(NAME).pcf $(NAME).v $(DEPS)
 	icepack $(NAME).txt $(NAME).bin
 
 clean:
-	rm -f lpc.blif lpc.txt lpc.ex lpc.bin
+	rm -f top.blif top.txt top.ex top.bin
 
