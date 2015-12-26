@@ -5,8 +5,8 @@ module ringbuffer #(parameter BITS = 5)
 		input reset,
 		output reg [BITS-1:0] write_addr,
 		output reg [BITS-1:0] read_addr,
-		output empty,
-		output overflow);
+		output reg empty,
+		output reg overflow);
 
 	reg [BITS-1:0] next_write_addr;
 
