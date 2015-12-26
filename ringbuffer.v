@@ -17,6 +17,7 @@ module ringbuffer #(parameter BITS = 5)
 		else
 			empty = 0;
 
+		// TODO: only overflow when written once to this address
 		if (next_write_addr == read_addr)
 			overflow = 1;
 		else
