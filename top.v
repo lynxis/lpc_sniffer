@@ -5,7 +5,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	input lpc_frame,
 	input lpc_reset,
 	input ext_clock,
-	output uart_tx,
+	output uart_tx_pin,
 	output lpc_clock_led,
 	output lpc_frame_led,
 	output lpc_reset_led,
@@ -114,7 +114,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 			.read_latch(uart_latch),
 			.reset(reset),
 			.ready(uart_ready),
-			.tx(uart_tx),
+			.tx(uart_tx_pin),
 			.clock(ext_clock),
 			.uart_clock(uart_clock));
 

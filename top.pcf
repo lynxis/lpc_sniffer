@@ -6,7 +6,7 @@ set_io lpc_clock 91
 set_io lpc_frame 90
 set_io lpc_reset 88
 set_io ext_clock 21
-set_io uart_tx 8
+set_io uart_tx_pin 8
 set_io lpc_clock_led 99
 set_io lpc_frame_led 98
 set_io lpc_reset_led 97
