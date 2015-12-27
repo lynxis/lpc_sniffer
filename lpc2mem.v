@@ -34,7 +34,7 @@ module lpc2mem(
 		else
 			case (state)
 				idle: begin
-					if (lpc_frame_done_clock) begin
+					if (~lpc_frame_done_clock) begin
 						state <= write_type;
 						write_clock <= 0;
 						lpc_frame_done <= 0;

@@ -21,11 +21,17 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 
 	localparam IDLE = 3'h0, START_BIT = 3'h1, DATA = 3'h2, PARITY = 3'h3, STOP_BIT = 3'h4;
 
-	always @(posedge clock) begin
-		if (divider >= CLOCKS_PER_BIT) begin
+	always @(negedge reset or posedge clock) begin
+		if (~reset) begin
+			uart_clock <= 0;
+			divider <= 0;
+		end
+		else if (divider >= CLOCKS_PER_BIT) begin
 			divider <= 0;
 			uart_clock <= ~uart_clock;
 		end
+		else
+			divider <= divider + 1;
 	end
 
 	always @(negedge ready or posedge read_clock or negedge reset) begin
