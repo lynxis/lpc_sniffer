@@ -3,7 +3,7 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 	(
 	input clock,
 	input [7:0] read_data,
-	input read_latch, /* on posedge new data are read */
+	input read_clock, /* on posedge new data are read */
 	input reset, /* active low */
 	output reg ready, /* ready to read new data */
 	output reg tx,
@@ -28,7 +28,7 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 		end
 	end
 
-	always @(negedge ready or posedge read_latch or negedge reset) begin
+	always @(negedge ready or posedge read_clock or negedge reset) begin
 		if (~reset)
 			new_data <= 0;
 		else

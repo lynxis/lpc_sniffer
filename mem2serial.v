@@ -11,7 +11,7 @@ module mem2serial #(parameter AW = 8)
 
 		input uart_ready,
 		output reg [7:0] uart_data,
-		output reg uart_latch);
+		output reg uart_clock_enable);
 
 	parameter idle = 0,
 		start_byte_1 = 1, complete_tx_start_byte_1 = 2,
@@ -23,7 +23,7 @@ module mem2serial #(parameter AW = 8)
 	always @(negedge reset or posedge clock) begin
 		if (~reset) begin
 			state <= idle;
-			uart_latch <= 0;
+			uart_clock_enable <= 0;
 			read_clock <= 0;
 		end
 		else
@@ -39,25 +39,25 @@ module mem2serial #(parameter AW = 8)
 					if (uart_ready)
 						uart_data <= 8'hff;
 						state <= complete_tx_start_byte_1;
-						uart_latch <= 1;
+						uart_clock_enable <= 1;
 				end
 				complete_tx_start_byte_1: begin
 					if (~uart_ready) begin
 						state <= start_byte_2;
-						uart_latch <= 0;
+						uart_clock_enable <= 0;
 					end
 				end
 				start_byte_2: begin
 					if (uart_ready) begin
 						uart_data <= 8'hff;
 						state <= complete_tx_start_byte_2;
-						uart_latch <= 1;
+						uart_clock_enable <= 1;
 					end
 				end
 				complete_tx_start_byte_2: begin
 					if (~uart_ready) begin
 						state <= read_lpc_memory;
-						uart_latch <= 0;
+						uart_clock_enable <= 0;
 					end
 				end
 				read_lpc_memory: begin
@@ -67,14 +67,14 @@ module mem2serial #(parameter AW = 8)
 					end
 					else if (uart_ready) begin
 						uart_data <= read_data;
-						uart_latch <= 1;
+						uart_clock_enable <= 1;
 						state <= complete_tx_read_lpc_memory;
 					end
 				end
 				complete_tx_read_lpc_memory: begin
 					if (~uart_ready) begin
 						state <= read_lpc_memory; /* last state check in read_lpc_memory */
-						uart_latch <= 0;
+						uart_clock_enable <= 0;
 						lower_addr <= lower_addr + 1;
 					end
 				end
