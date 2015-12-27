@@ -27,63 +27,51 @@ module lpc2mem(
 		write_data = 3'h5,
 		idle = 3'h6;
 
-	always @(clock) begin
-		if (clock && counter != idle) begin
-			ram_write_clock = 1;
-		end
-		else
-		begin
-			ram_write_clock = 0;
-		end
-	end
-
-	always @(posedge lpc_latch) begin
-			buffer_lpc_addr <= lpc_addr;
-			buffer_lpc_data <= lpc_data;
-			buffer_lpc_cyctype_dir <= lpc_cyctype_dir;
-			buffer_target_addr <= target_addr;
-	end
-
 	always @(negedge reset or posedge clock) begin
 		if (~reset) begin
 			counter <= idle;
 		end
-		else if (lpc_latch)
-			if (counter == idle)
-				counter <= write_type;
 		else
-				case (counter)
-					idle: begin
+			case (counter)
+				idle: begin
+					if (lpc_frame_done_clock) begin
+						write_clock <= 0;
 						lpc_frame_done <= 0;
+						buffer_lpc_addr <= lpc_addr;
+						buffer_lpc_data <= lpc_data;
+						buffer_lpc_cyctype_dir <= lpc_cyctype_dir;
+						buffer_target_addr <= target_addr;
 					end
-					write_type: begin
-						counter <= write_addr_0;
-						ram_data [3:0] <= buffer_lpc_cyctype_dir;
-						ram_data [7:4] <= 4'h0;
-					end
-					write_addr_0: begin
-						counter <= write_addr_1;
-						ram_data <= buffer_lpc_addr[31:24];
-					end
-					write_addr_1: begin
-						counter <= write_addr_2;
-						ram_data <= buffer_lpc_addr[23:16];
-					end
-					write_addr_2: begin
-						counter <= write_addr_3;
-						ram_data <= buffer_lpc_addr[15:8];
-					end
-					write_addr_3: begin
-						counter <= write_data;
-						ram_data <= buffer_lpc_addr[7:0];
-					end
-					write_data: begin
-						counter <= idle;
-						ram_data <= buffer_lpc_data;
-						lpc_frame_done <= 1;
-					end
-					default: begin end
-				endcase
+				end
+				write_type: begin
+					counter <= write_addr_0;
+					ram_data [3:0] <= buffer_lpc_cyctype_dir;
+					ram_data [7:4] <= 4'h0;
+				end
+				write_addr_0: begin
+					counter <= write_addr_1;
+					ram_data <= buffer_lpc_addr[31:24];
+				end
+				write_addr_1: begin
+					counter <= write_addr_2;
+					ram_data <= buffer_lpc_addr[23:16];
+				end
+				write_addr_2: begin
+					counter <= write_addr_3;
+					ram_data <= buffer_lpc_addr[15:8];
+				end
+				write_addr_3: begin
+					counter <= write_data;
+					ram_data <= buffer_lpc_addr[7:0];
+				end
+				write_data: begin
+					counter <= idle;
+					ram_data <= buffer_lpc_data;
+					lpc_frame_done <= 1;
+					write_clock <= 1;
+				end
+				default: begin end
+			endcase
 	end
 
 	assign ram_addr [7:3] = buffer_target_addr;
