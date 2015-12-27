@@ -70,7 +70,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.ram_addr(write_addr),
 		.ram_data(write_data),
 		.write_clock(ram_write_clock),
-		.lpc_frame_done(write_done));
+		.written_frame_to_mem_clock(write_done));
 
 	buffer #(.AW(8), .DW(8))
 		MEM (
