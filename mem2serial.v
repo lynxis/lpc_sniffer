@@ -33,6 +33,7 @@ module mem2serial #(parameter AW = 8)
 						state <= start_byte_1;
 						lower_addr <= 0;
 						read_done <= 0;
+						read_clock <= 0;
 					end
 				end
 				start_byte_1: begin
@@ -76,6 +77,7 @@ module mem2serial #(parameter AW = 8)
 						state <= read_lpc_memory; /* last state check in read_lpc_memory */
 						uart_clock_enable <= 0;
 						lower_addr <= lower_addr + 1;
+						read_clock <= 1;
 					end
 				end
 			endcase
