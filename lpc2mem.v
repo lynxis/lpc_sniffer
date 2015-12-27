@@ -35,6 +35,7 @@ module lpc2mem(
 			case (counter)
 				idle: begin
 					if (lpc_frame_done_clock) begin
+						state <= write_type;
 						write_clock <= 0;
 						lpc_frame_done <= 0;
 						buffer_lpc_addr <= lpc_addr;
