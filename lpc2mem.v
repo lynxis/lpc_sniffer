@@ -21,7 +21,7 @@ module lpc2mem(
 	reg [4:0] buffer_target_addr;
 
 	/* we need to save 8 byte */
-	reg [2:0] counter;
+	reg [2:0] state;
 	parameter write_type = 3'h0,
 		write_addr_0 = 3'h1, write_addr_1 = 3'h2, write_addr_2 = 3'h3, write_addr_3 = 3'h4,
 		write_data = 3'h5,
@@ -29,10 +29,10 @@ module lpc2mem(
 
 	always @(negedge reset or posedge clock) begin
 		if (~reset) begin
-			counter <= idle;
+			state <= idle;
 		end
 		else
-			case (counter)
+			case (state)
 				idle: begin
 					if (lpc_frame_done_clock) begin
 						state <= write_type;
@@ -45,28 +45,28 @@ module lpc2mem(
 					end
 				end
 				write_type: begin
-					counter <= write_addr_0;
+					state <= write_addr_0;
 					ram_data [3:0] <= buffer_lpc_cyctype_dir;
 					ram_data [7:4] <= 4'h0;
 				end
 				write_addr_0: begin
-					counter <= write_addr_1;
+					state <= write_addr_1;
 					ram_data <= buffer_lpc_addr[31:24];
 				end
 				write_addr_1: begin
-					counter <= write_addr_2;
+					state <= write_addr_2;
 					ram_data <= buffer_lpc_addr[23:16];
 				end
 				write_addr_2: begin
-					counter <= write_addr_3;
+					state <= write_addr_3;
 					ram_data <= buffer_lpc_addr[15:8];
 				end
 				write_addr_3: begin
-					counter <= write_data;
+					state <= write_data;
 					ram_data <= buffer_lpc_addr[7:0];
 				end
 				write_data: begin
-					counter <= idle;
+					state <= idle;
 					ram_data <= buffer_lpc_data;
 					lpc_frame_done <= 1;
 					write_clock <= 1;
@@ -76,5 +76,5 @@ module lpc2mem(
 	end
 
 	assign ram_addr [7:3] = buffer_target_addr;
-	assign ram_addr [2:0] = counter;
+	assign ram_addr [2:0] = state;
 endmodule
