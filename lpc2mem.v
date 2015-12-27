@@ -4,8 +4,8 @@ module lpc2mem(
 	input [3:0] lpc_cyctype_dir, /* memory or i/o or dma(dma is unsuported)) + direction. same as in lpc spec */
 	input [31:0] lpc_addr, /* i/o has 16bit, memory 32 bit */
 	input [7:0] lpc_data, /* data written or read */
-	input lpc_frame_done_clock, /* read in data when high */
-	input clock, /* external clock, could connected to (lpc clock / 2) */
+	input lpc_frame_done_clock, /* read in data when low */
+	input clock, /* external clock */
 	input reset,
 	input [4:0] target_addr, /* write next lpc frame into this addr (5bit higher bit of a 8bit addr) */
 	output [7:0] ram_addr, /* write data to this addr */
