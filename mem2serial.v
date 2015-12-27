@@ -1,7 +1,7 @@
 module mem2serial #(parameter AW = 8)
 	(
 		output reg read_clock,
-		input [7:0] read_data,
+		input [47:0] read_data,
 		output [AW-1:0] read_addr,
 		input [AW-1-3:0] target_addr,
 		output reg read_done,
@@ -62,12 +62,25 @@ module mem2serial #(parameter AW = 8)
 					end
 				end
 				read_lpc_memory: begin
-					if (lower_addr > 6) begin
+					if (lower_addr >= 6) begin
 						state <= idle; /* finished lpc frame */
 						read_done <= 1;
 					end
 					else if (uart_ready) begin
-						uart_data <= read_data;
+						case (lower_addr)
+							0:
+								uart_data <= read_data[7:0];
+							1:
+								uart_data <= read_data[15:8];
+							2:
+								uart_data <= read_data[23:16];
+							3:
+								uart_data <= read_data[31:24];
+							4:
+								uart_data <= read_data[39:32];
+							5:
+								uart_data <= read_data[47:40];
+						endcase
 						uart_clock_enable <= 1;
 						state <= complete_tx_read_lpc_memory;
 					end

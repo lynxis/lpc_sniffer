@@ -23,7 +23,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 
 	/* lpc2mem -> memory */
 	wire [7:0] write_addr;
-	wire [7:0] write_data;
+	wire [47:0] write_data;
 	wire ram_write_clock;
 
 	/* ring buffer */
@@ -36,7 +36,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 
 	/* mem2serial */
 	wire [7:0] read_addr;
-	wire [7:0] read_data;
+	wire [47:0] read_data;
 	wire read_clock;
 
 	/* uart tx */
@@ -72,7 +72,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.write_clock(ram_write_clock),
 		.written_frame_to_mem_clock(write_done));
 
-	buffer #(.AW(8), .DW(8))
+	buffer #(.AW(8), .DW(48))
 		MEM (
 			.write_clock(ram_write_clock),
 			.write_data(write_data),
