@@ -37,7 +37,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	/* mem2serial */
 	wire [7:0] read_addr;
 	wire [7:0] read_data;
-	wire read_latch;
+	wire read_clock;
 
 	/* uart tx */
 	wire uart_ready;
@@ -77,7 +77,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 			.write_clock(ram_write_clock),
 			.write_data(write_data),
 			.write_addr(write_addr),
-			.read_clock(read_latch),
+			.read_clock(read_clock),
 			.read_data(read_data),
 			.read_addr(read_addr));
 
@@ -97,7 +97,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.reset(reset),
 		.clock(ext_clock),
 		.read_empty(empty),
-		.read_clock(read_latch),
+		.read_clock(read_clock),
 		.read_data(read_data),
 		.read_addr(read_addr),
 		.target_addr(upper_read_addr),
