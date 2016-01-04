@@ -98,8 +98,6 @@ module lpc(
 
 	always @(posedge lpc_clock)
 	begin
-		addr[31:16] <= 0; /* still unused - memory mode requires these bits */
-
 		case (state)
 			// wait for start segment
 			idle: begin
@@ -124,7 +122,6 @@ module lpc(
 					endcase
 				end
 				2'b10: begin /* 32 bit memory */
-					addr[31:16] <= 0;
 					case (counter)
 						8:
 							addr[31:28] <= lpc_ad;
