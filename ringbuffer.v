@@ -1,15 +1,18 @@
-module ringbuffer #(parameter BITS = 5)
+module ringbuffer #(parameter AW = 8, DW = 48)
 	(
-		input write_done,
-		input read_done,
 		input reset,
-		output reg [BITS-1:0] write_addr,
-		output reg [BITS-1:0] read_addr,
+		input clock,
+		input read_clock_enable,
+		input write_clock_enable,
+		output [DW-1:0] read_data,
+		input [DW-1:0] write_data,
 		output reg empty,
 		output reg overflow);
 
-	reg [BITS-1:0] next_write_addr;
+	reg [AW-1:0] next_write_addr;
 
+	reg [AW-1:0] read_addr;
+	reg [AW-1:0] write_addr;
 
 	always @(*) begin
 		if (read_addr == write_addr)
@@ -25,25 +28,37 @@ module ringbuffer #(parameter BITS = 5)
 
 	end
 
-	always @(negedge reset or posedge write_done) begin
+	always @(negedge reset or negedge clock) begin
 		if (~reset) begin
 			write_addr <= 0;
 			next_write_addr <= 1;
 		end
 		else
-			if (~overflow) begin
-				write_addr <= write_addr + 1;
-				next_write_addr <= next_write_addr + 1;
-			end
+			if (write_clock_enable)
+				if (~overflow) begin
+					write_addr <= write_addr + 1;
+					next_write_addr <= next_write_addr + 1;
+				end
 	end
 
-	always @(negedge reset or posedge read_done) begin
+	always @(negedge reset or negedge clock) begin
 		if (~reset) begin
 			read_addr <= 0;
 		end
 		else begin
-			if (~empty)
-				read_addr <= read_addr + 1;
+			if (read_clock_enable)
+				if (~empty)
+					read_addr <= read_addr + 1;
 		end
 	end
+
+	buffer #(.AW(8), .DW(48))
+		MEM (
+			.clock(clock),
+			.write_clock_enable(write_clock_enable),
+			.write_data(write_data),
+			.write_addr(write_addr),
+			.read_clock_enable(read_clock_enable),
+			.read_data(read_data),
+			.read_addr(read_addr));
 endmodule
