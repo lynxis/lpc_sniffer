@@ -19,25 +19,18 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	wire [3:0] dec_cyctype_dir;
 	wire [31:0] dec_addr;
 	wire [7:0] dec_data;
-	wire dec_clock;
 
 	/* lpc2mem -> memory */
-	wire [7:0] write_addr;
 	wire [47:0] write_data;
-	wire ram_write_clock;
 
 	/* ring buffer */
-	wire [4:0] upper_read_addr;
-	wire [4:0] upper_write_addr;
-	wire read_done;
-	wire write_done;
+	wire read_clock_enable;
+	wire write_clock_enable;
 	wire empty;
 	wire overflow;
 
 	/* mem2serial */
-	wire [7:0] read_addr;
 	wire [47:0] read_data;
-	wire read_clock;
 
 	/* uart tx */
 	wire uart_ready;
@@ -57,39 +50,21 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.out_cyctype_dir(dec_cyctype_dir),
 		.out_addr(dec_addr),
 		.out_data(dec_data),
-		.out_clock_enable(dec_clock));
+		.out_clock_enable(write_clock_enable));
 
-	lpc2mem LPC_MEM(
-		.reset(reset),
-		.lpc_cyctype_dir(dec_cyctype_dir),
-		.lpc_addr(dec_addr),
-		.lpc_data(dec_data),
-		.lpc_frame_done_clock(dec_clock),
-		.clock(lpc_clock),
-		.target_addr(upper_write_addr),
-		.ram_addr(write_addr),
-		.ram_data(write_data),
-		.write_clock(ram_write_clock),
-		.written_frame_to_mem_clock(write_done));
+	assign write_data[47:16] = dec_addr;
+	assign write_data[15:8] = dec_data;
+	assign write_data[7:4] = 0;
+	assign write_data[3:0] = dec_cyctype_dir;
 
-	buffer #(.AW(8), .DW(48))
-		MEM (
-			.write_clock(ram_write_clock),
-			.write_data(write_data),
-			.write_addr(write_addr),
-			.read_clock(read_clock),
-			.read_data(read_data),
-			.read_addr(read_addr));
-
-	/* ringbuffer only counts the upper 5 bits, the lower 3 bits required
-	 * to save 6 bytes, 2 byte are wasted */
-	ringbuffer #(.BITS(5))
+	ringbuffer #(.AW(8), .DW(48))
 		RINGBUFFER (
 			.reset(reset),
-			.write_done(write_done),
-			.read_done(read_done),
-			.write_addr(upper_write_addr),
-			.read_addr(upper_read_addr),
+			.clock(ext_clock),
+			.write_clock_enable(write_clock_enable),
+			.read_clock_enable(read_clock_enable),
+			.read_data(read_data),
+			.write_data(write_data),
 			.empty(empty),
 			.overflow(overflow));
 
@@ -97,11 +72,8 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.reset(reset),
 		.clock(ext_clock),
 		.read_empty(empty),
-		.read_clock(read_clock),
+		.read_clock_enable(read_clock_enable),
 		.read_data(read_data),
-		.read_addr(read_addr),
-		.target_addr(upper_read_addr),
-		.read_done(read_done),
 		.uart_clock_enable(uart_clock_enable),
 		.uart_ready(uart_ready),
 		.uart_data(uart_data));
@@ -109,7 +81,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	uart_tx #(.CLOCK_FREQ(CLOCK_FREQ), .BAUD_RATE(BAUD_RATE))
 		SERIAL (
 			.read_data(uart_data),
-			.read_clock(uart_clock_enable),
+			.read_clock_enable(uart_clock_enable),
 			.reset(reset),
 			.ready(uart_ready),
 			.tx(uart_tx_pin),
