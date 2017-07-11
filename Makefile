@@ -7,6 +7,12 @@ $(NAME).bin: $(NAME).pcf $(NAME).v $(DEPS)
 	arachne-pnr -d 1k -p $(NAME).pcf $(NAME).blif -o $(NAME).txt
 	icepack $(NAME).txt $(NAME).bin
 
-clean:
-	rm -f top.blif top.txt top.ex top.bin
+testbenches: buffer_tb.vvp
 
+buffer_tb.vvp: buffer.v buffer_tb.v
+	iverilog -obuffer_tb.vvp $^
+
+clean:
+	rm -f top.blif top.txt top.ex top.bin *.vvp
+
+.PHONY: clean testbenches
