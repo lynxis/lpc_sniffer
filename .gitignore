@@ -2,4 +2,4 @@ top.bin
 top.blif
 top.ex
 top.txt
-
+*.vcd

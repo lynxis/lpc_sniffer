@@ -18,15 +18,15 @@ module lpc(
 	output [3:0] out_cyctype_dir,
 	output [31:0] out_addr,
 	output [7:0] out_data,
-	output out_clock_enable);
+	output reg out_clock_enable);
 
 	/* type and direction. same as in LPC Spec 1.1 */
 
 	/* addr + data written or read */
 
 	/* state machine */
-	reg [3:0] state = 0;
 	localparam idle = 0, start = 1, cycle_dir = 2, address = 3, tar = 4, sync = 5, read_data = 6, abort = 7;
+	reg [3:0] state = idle;
 
 	/* counter used by some states */
 	reg [3:0] counter;
@@ -37,32 +37,48 @@ module lpc(
 	reg [31:0] addr;
 	reg [7:0] data;
 
+   initial begin
+      $monitor("lpc: state %d counter %d lpc_clock %d lpc_reset %d lpc_frame %d lpc_ad %x cyctype_dir %x", state, counter, lpc_clock, lpc_reset, lpc_frame, lpc_ad, cyctype_dir);   
+   end
+   
 	always @(posedge lpc_clock or negedge lpc_reset) begin
 		if (~lpc_reset) begin
 			state <= idle;
 			counter <=  0;
 		end
 		else begin
+		   if (~lpc_frame && lpc_ad == 4'b1111) begin
+		      //bus cycle abort by master
+		      state <= idle;
+		      counter <= 0;
+		   end else
 			if (counter != 0)
 				counter <= counter - 1;
 			else
 				case (state)
 					idle:
 						// wait for start condition
-						if (~lpc_frame && lpc_ad == 4'b1111)
+						if (~lpc_frame && lpc_ad == 4'b0000)
 							state <= cycle_dir;
 					cycle_dir: begin
-						if (cyctype_dir[3:2] == 2'b00) begin /* i/o */
+					   if (~lpc_frame) begin
+					      // frame is asserted over 2+ cycles - we only stay in state cycle_dir if the AD value of the last cycle is 4'b0000
+					      if (lpc_ad != 4'b0000) begin
+						 state <= idle;
+					      end
+					   end else begin
+						if (lpc_ad[3:2] == 2'b00) begin /* i/o */
 							state <= address;
 							counter <= 4;
 						end
-						else if (cyctype_dir[3:2] == 2'b01) begin /* memory */
+						else if (lpc_ad[3:2] == 2'b01) begin /* memory */
 							state <= address;
 							counter <= 8;
 						end
 						else begin /* dma or reserved not yet supported */
 							state <= idle;
 						end
+					   end
 					end
 					address: begin
 						if (cyctype_dir[1]) begin /* write memory or i/o */
