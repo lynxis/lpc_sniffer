@@ -7,7 +7,7 @@
 	* out_cyctype_dir: type and direction. same as in LPC Spec 1.1
         * out_addr: 16-bit address
         * out_data: data read or written (1byte)
-	* out_clock_enable: on rising edge all data must read.
+	* out_clock_enable: on falling edge all data must read.
  */
 
 module lpc(
@@ -25,7 +25,8 @@ module lpc(
 	/* addr + data written or read */
 
 	/* state machine */
-	localparam idle = 0, start = 1, cycle_dir = 2, address = 3, tar = 4, sync = 5, read_data = 6, abort = 7;
+   	localparam idle = 0, start = 1, cycle_dir = 2, address = 3, tar = 4, sync = 5, read_data = 6, abort = 7, tar_after_read = 8;
+   
 	reg [3:0] state = idle;
 
 	/* counter used by some states */
@@ -36,15 +37,17 @@ module lpc(
 
 	reg [31:0] addr;
 	reg [7:0] data;
-
+/*
    initial begin
       $monitor("lpc: state %d counter %d lpc_clock %d lpc_reset %d lpc_frame %d lpc_ad %x cyctype_dir %x", state, counter, lpc_clock, lpc_reset, lpc_frame, lpc_ad, cyctype_dir);   
    end
+*/
    
 	always @(posedge lpc_clock or negedge lpc_reset) begin
 		if (~lpc_reset) begin
 			state <= idle;
 			counter <=  0;
+		   	out_clock_enable <= 0;
 		end
 		else begin
 		   if (~lpc_frame && lpc_ad == 4'b1111) begin
@@ -69,11 +72,11 @@ module lpc(
 					   end else begin
 						if (lpc_ad[3:2] == 2'b00) begin /* i/o */
 							state <= address;
-							counter <= 4;
+							counter <= 3;
 						end
 						else if (lpc_ad[3:2] == 2'b01) begin /* memory */
 							state <= address;
-							counter <= 8;
+							counter <= 7;
 						end
 						else begin /* dma or reserved not yet supported */
 							state <= idle;
@@ -83,28 +86,38 @@ module lpc(
 					address: begin
 						if (cyctype_dir[1]) begin /* write memory or i/o */
 							state <= read_data;
-							counter <= 2;
+							counter <= 1;
 						end
 						else begin /* read memory or i/o */
 							state <= tar;
-							counter <= 2;
+							counter <= 1;
 						end
 					end
 					tar: begin
 						state <= sync;
 					end
-					sync:
+					sync: begin
+//					  $display("lpc_ad %x cyctype_dir[3] %d", lpc_ad, cyctype_dir[3]);
+				  
 						if (lpc_ad == 4'b0000)
 							if (cyctype_dir[3] == 0) begin /* i/o or memory */
 								state <= read_data;
-								counter <= 2;
+								counter <= 1;
 							end
 							else
 								state <= idle; /* dma or reserved */
+					   end
 					read_data: begin
-						state <= idle;
+						state <= tar_after_read;
+					   counter <= 1;
 					end
-
+				  
+				  	tar_after_read: begin
+//					   $display("tar_after_read --> idle");
+					   
+					   state <= idle;
+					end
+				  
 					abort: begin /* lpc abort */
 						counter <= 2;
 					end
@@ -118,8 +131,6 @@ module lpc(
 
 		case (state)
 			// wait for start segment
-			idle: begin
-			end
 
 			cycle_dir: begin
 				cyctype_dir <= lpc_ad;
@@ -129,34 +140,34 @@ module lpc(
 				2'b00: begin /* 16 bit i/o */
 					addr[31:16] <= 0;
 					case (counter)
-						4:
-							addr[15:12] <= lpc_ad;
 						3:
-							addr[11:8] <= lpc_ad;
+							addr[15:12] <= lpc_ad;
 						2:
-							addr[7:4] <= lpc_ad;
+							addr[11:8] <= lpc_ad;
 						1:
+							addr[7:4] <= lpc_ad;
+						0:
 							addr[3:0] <= lpc_ad;
 					endcase
 				end
 				2'b10: begin /* 32 bit memory */
 					addr[31:16] <= 0;
 					case (counter)
-						8:
-							addr[31:28] <= lpc_ad;
 						7:
-							addr[27:24] <= lpc_ad;
+							addr[31:28] <= lpc_ad;
 						6:
-							addr[23:20] <= lpc_ad;
+							addr[27:24] <= lpc_ad;
 						5:
-							addr[19:16] <= lpc_ad;
+							addr[23:20] <= lpc_ad;
 						4:
-							addr[15:12] <= lpc_ad;
+							addr[19:16] <= lpc_ad;
 						3:
-							addr[11:8] <= lpc_ad;
+							addr[15:12] <= lpc_ad;
 						2:
-							addr[7:4] <= lpc_ad;
+							addr[11:8] <= lpc_ad;
 						1:
+							addr[7:4] <= lpc_ad;
+						0:
 							addr[3:0] <= lpc_ad;
 					endcase
 				end
@@ -167,10 +178,10 @@ module lpc(
 			read_data: begin
 				case (counter)
 					1:
-						data[7:4] <= lpc_ad[3:0];
+						data[3:0] <= lpc_ad[3:0];
 					0: begin
 						out_clock_enable <= 1;
-						data[3:0] <= lpc_ad[3:0];
+						data[7:4] <= lpc_ad[3:0];
 					end
 				endcase
 			end

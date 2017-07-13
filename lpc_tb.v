@@ -35,7 +35,6 @@ module lpc_tb ();
       
      begin
 	// four cycles for the address - highest nibble first!
-	$display("#DBG load_addr16: %x", addr);	 
 	lpc_ad = (addr >> 12) & 'hf;
 	#1 lpc_clock = 1;
 	#1 lpc_clock = 0;
@@ -58,7 +57,6 @@ module lpc_tb ();
    task load_addr32;
       input integer addr;
       begin
-	 $display("#DBG load_addr32: %x", addr);	 
 	 load_addr16((addr >> 16) & 'hffff);
 	 load_addr16(addr & 'hffff);
       end
@@ -71,7 +69,6 @@ module lpc_tb ();
       input integer data;
       begin
 	 // two cycles for data - lower nibble first!
-	 $display("#DBG load_data: %x", data);	 
 
 	 lpc_ad = data & 'hf;
 	 #1 lpc_clock = 1;
@@ -92,7 +89,6 @@ module lpc_tb ();
       input integer start_value_last; // the value of lpc_ad when frame is asserted in the last cycle
       
       begin
-	 $display("lpc_start: nr %d start %x start_last %x", nr_frame_clks, start_value, start_value_last);
 	 
 	 lpc_frame = 0;
 	 if (nr_frame_clks > 1) begin
@@ -142,6 +138,7 @@ module lpc_tb ();
       load_addr16(test_addr);
       
       // tar
+      lpc_ad = 4'bzzzz;
       #1 lpc_clock = 1;
       #1 lpc_clock = 0;
       #1 lpc_clock = 1;
@@ -156,11 +153,16 @@ module lpc_tb ();
       
       
      // tar
+      lpc_ad = 4'bzzzz;
       #1 lpc_clock = 1;
       #1 lpc_clock = 0;
       #1 lpc_clock = 1;
       #1 lpc_clock = 0;
 
+      // idle clock
+      #1 lpc_clock = 1;
+      #1 lpc_clock = 0;
+      
       $finish;
       
    end // initial begin
