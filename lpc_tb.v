@@ -8,7 +8,8 @@ module lpc_tb ();
    reg 	       lpc_reset;
    wire [3:0]  ct_dir;
    wire [31:0] addr;
-   wire [7:0]  data;
+   wire [31:0]  data;
+   wire [3:0] 	data_size;
    wire        out_clock;
 
 
@@ -24,6 +25,7 @@ module lpc_tb ();
 	    .out_cyctype_dir(ct_dir),
 	    .out_addr(addr),
 	    .out_data(data),
+	    .out_data_size(data_size),
 	    .out_clock_enable(out_clock)
 	    );
 
@@ -168,7 +170,7 @@ module lpc_tb ();
    end // initial begin
 
    always @(posedge out_clock) begin
-      $display("#DBG LPC output addr %x data %x ct_dir %x", addr, data, ct_dir);
+      $display("#DBG LPC output addr %x data %x data_size %d ct_dir %x", addr, data, data_size, ct_dir);
       //TODO: check for correct values
    end
  
