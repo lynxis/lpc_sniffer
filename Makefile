@@ -1,7 +1,7 @@
 
 NAME=top
 DEPS=buffer.v lpc.v lpc2mem.v mem2serial.v ringbuffer.v uart_tx.v power_on_reset.v
-# all files *-tb*.v are treated as testbench files - the part before the '-' must match the module it tests
+# all files *-tb*.v are treated as testbench files - the part before the '-' must match the module it tests (without the .v extension)
 TESTS_SRC = $(wildcard *-tb*.v)
 TESTS_BIN = $(TESTS_SRC:.v=.vvp)
 

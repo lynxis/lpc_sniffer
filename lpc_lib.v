@@ -147,6 +147,15 @@ task lpc_ctdir;
    end
 endtask
 
+task lpc_size;
+   input integer sz;
+   begin
+      lpc_ad = sz;
+      #1 lpc_clock = 1;
+      #1 lpc_clock = 0;
+   end
+endtask
+      
 // abort a cycle
 task lpc_abort;
    begin

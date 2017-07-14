@@ -141,7 +141,7 @@ module lpc(
 
 	     size: begin
 		data_size <= get_size(lpc_ad);
-		if (data_size != 0)
+		if (get_size(lpc_ad) != 0)
 		  // valid data size
 		  state <= addr7; //memory access always have 32 bit addresses
 		else
