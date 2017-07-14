@@ -1,7 +1,7 @@
 
 NAME=top
 DEPS=buffer.v lpc.v lpc2mem.v mem2serial.v ringbuffer.v uart_tx.v power_on_reset.v
-TESTS_SRC=buffer-tb.v lpc-tb_read_io1.v lpc-tb_read_io2.v lpc-tb_read_io3.v lpc-tb_write_io1.v
+TESTS_SRC = $(wildcard *-tb_*.v)
 TESTS_BIN = $(TESTS_SRC:.v=.vvp)
 
 $(NAME).bin: $(NAME).pcf $(NAME).v $(DEPS)

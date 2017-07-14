@@ -112,8 +112,10 @@ module lpc(
 	     
 	     idle:
 	       // wait for start condition
-	       if (~lpc_frame && lpc_ad == 4'b0000)
-		 state <= cycle_dir;
+	       if (~lpc_frame && lpc_ad == 4'b0000) begin
+		  state <= cycle_dir;
+		  out_clock_enable <= 0; // it may be high from last cycle
+	       end
 	     
 	     cycle_dir: begin
 		if (~lpc_frame) begin
