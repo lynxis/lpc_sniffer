@@ -146,7 +146,18 @@ task lpc_ctdir;
       #1 lpc_clock = 0;
    end
 endtask
-     
+
+// abort a cycle
+task lpc_abort;
+   begin
+      lpc_ad = 4'b1111;
+      lpc_frame = 0;
+      #1 lpc_clock = 1;
+      #1 lpc_clock = 0;
+      lpc_frame = 1;
+   end
+endtask
+
 // watch for data on rising edge of out_clock
 //  result_addr, result_data, result_datasize, result_ct_dir -- last data we got on rising edge of out_clock_enable
 //  result_number - number of results
