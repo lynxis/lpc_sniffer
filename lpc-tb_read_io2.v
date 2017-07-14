@@ -20,7 +20,8 @@ module lpc_tb_read_io2 ();
    integer  expected_data = test_data;
    integer  expected_datasize = 1;
    integer  expected_ct_dir = 0;
-
+   integer  expected_number = 1; // we expect on dataset
+   
    /* the actual results we get */
    integer  result_addr;
    integer  result_data;
@@ -45,31 +46,24 @@ module lpc_tb_read_io2 ();
    initial begin
       $dumpfile ("lpc-tb_read_io2.vcd");
       $dumpvars (0, lpc_tb_read_io2);
-            
-      // start with a LPC reset
-      lpc_reset = 1;
-      #1 lpc_reset = 0;
-      #1 lpc_reset = 1;
+
+      lpc_assert_reset;
 
       lpc_clock = 0; // all tasks require to have lpc_clock zero before
       
       // LPC start: frame asserted for two cycles with ad == 4 and one cycle with ad == 0000
       lpc_start(3, 4, 0);
-      
+
       // start with i/o read access
-      lpc_ad = 4'b0000; // bit 3:2 = 0 --> i/o, bit 1 = 0 --> read
-      #1 lpc_clock = 1;
-      #1 lpc_clock = 0;
+      // bit 3:2 = 0 --> i/o, bit 1 = 0 --> read
+      lpc_ctdir(4'b0000);
       
       lpc_addr16(test_addr);
 
       lpc_tar;
-      
-      // sync from target - no wait
-      lpc_ad = 0;
-      #1 lpc_clock = 1;
-      #1 lpc_clock = 0;
 
+      lpc_sync;
+      
       lpc_data(test_data);
       
       lpc_tar;
@@ -78,39 +72,16 @@ module lpc_tb_read_io2 ();
       #1 lpc_clock = 1;
       #1 lpc_clock = 0;
 
-      if (result_number != 1) begin
-	 $display("#ERR got %d results", result_number);
-	 $stop; // if we call vvp with -N this will produce an exit code of 1
-      end else begin
-	 if ((result_addr != expected_addr) || (result_data != expected_data) ||
-	     (result_datasize != expected_datasize) || (result_ct_dir != expected_ct_dir)) begin
-	    if (result_addr != expected_addr)
-	       $display("#ERR got addr %x, expected %x", result_addr, expected_addr);
-	    if (result_data != expected_data)
-	      $display("#ERR got data %x, expected %x", result_data, expected_data);
-	    if (result_datasize != expected_datasize)
-	      $display("#ERR got datasize %d, expected %d", result_datasize, expected_datasize);
-	    if (result_ct_dir != expected_ct_dir)
-	      $display("#ERR got ct_dir %x, expected %x", result_ct_dir, expected_ct_dir);
-	    
-	    $stop; // if we call vvp with -N this will produce an exit code of 1
-	 end
-      end
+      check_results;
+      
       $finish;
       
    end // initial begin
 
    always @(posedge out_clock) begin
-//      $display("#DBG LPC output addr %x data %x data_size %d ct_dir %x", addr, data, data_size, ct_dir);
-      result_addr = addr;
-      result_data = data;
-      result_datasize = data_size;
-      result_ct_dir = ct_dir;
-      result_number = result_number + 1;
-      
-      //TODO: check for correct values
+      watch_results;
    end
- 
+   
 endmodule    
       
      

@@ -38,27 +38,27 @@ module lpc(
      addr3 = 7,
      addr2 = 8,
      addr1 = 9,
-     addr0 = 10,
+     addr0 = 'ha,
 	  
-     tarA_1 = 11, // first tar cycle after address (only in case of read access)
-     tarA_2 = 12, // second tar cycle after address (only in case of read access)
+     tarA_1 = 'hb, // first tar cycle after address (only in case of read access)
+     tarA_2 = 'hc, // second tar cycle after address (only in case of read access)
 
-     syncR = 13, // sync for read access
+     syncR = 'hd, // sync for read access
 	  
-     data0 = 14, //first data cycle: bit 3:0
-     data1 = 15, //second data cycle: bit 7:4
-     data2 = 16, //bit 11:8
-     data3 = 17,
-     data4 = 18,
-     data5 = 19,
-     data6 = 20,
-     data7 = 21,
+     data0 = 'he, //first data cycle: bit 3:0
+     data1 = 'hf, //second data cycle: bit 7:4
+     data2 = 'h10, //bit 11:8
+     data3 = 'h11,
+     data4 = 'h12,
+     data5 = 'h13,
+     data6 = 'h14,
+     data7 = 'h15,
 	  
-     tarD_1 = 22, // first tar cycle after data (both read and write)
-     tarD_2 = 23, // second tar cycle after data
-     syncW = 24, // sync for write access
-     tarE_1 = 25, // first tar cycle after data + sync (only in case of write access)
-     tarE_2 = 26; // first tar cycle after data + sync (only in case of write access)
+     tarD_1 = 'h16, // first tar cycle after data (both read and write)
+     tarD_2 = 'h17, // second tar cycle after data
+     syncW =  'h18, // sync for write access
+     tarE_1 = 'h19, // first tar cycle after data + sync (only in case of write access)
+     tarE_2 = 'h1a; // first tar cycle after data + sync (only in case of write access)
    
    reg [4:0] 		 state = idle;
 

@@ -114,7 +114,7 @@ task lpc_tar;
       #1 lpc_clock = 0;
    end
 endtask
-   
+
 //put nr_sync many long sync (lpc_ad == 6) on the bus
 // assume that lpc_clock is 0 when called
 // lpc_clock is 0 afterwards
@@ -128,3 +128,68 @@ task lpc_longsync;
       end
    end
 endtask   
+
+//assert a reset on the bus, async to the clock
+task lpc_assert_reset;
+   begin
+      lpc_reset = 1;
+      #1 lpc_reset = 0;
+      #1 lpc_reset = 1;
+   end;
+endtask
+
+task lpc_ctdir;
+   input integer ad;
+   begin
+      lpc_ad = ad;
+      #1 lpc_clock = 1;
+      #1 lpc_clock = 0;
+   end
+endtask
+     
+// watch for data on rising edge of out_clock
+//  result_addr, result_data, result_datasize, result_ct_dir -- last data we got on rising edge of out_clock_enable
+//  result_number - number of results
+//  addr, data, data_size, ct_dir - output data from lpc.v instance
+task watch_results;
+   begin
+      //      $display("#DBG LPC output addr %x data %x data_size %d ct_dir %x", addr, data, data_size, ct_dir);
+      result_addr = addr;
+      result_data = data;
+      result_datasize = data_size;
+      result_ct_dir = ct_dir;
+      result_number = result_number + 1;	 
+   end
+endtask // if
+
+//check for the results
+// needed global variables:
+//  result_addr, result_data, result_datasize, result_ct_dir -- last data we got on rising edge of out_clock_enable
+//  result_number - number of results
+//  expected_addr, expected_data, expected_datasize, expected_ct_dir -- expected values for the result_* variables
+//  if expected_number == 0 --> ignore the other expected_* vars
+//  if expected_number > 1 --> expected_* vars are the last data
+task check_results;
+   begin
+      if (result_number != expected_number) begin
+	 $display("#ERR got %d results, expected %d", result_number, expected_number);
+	 $stop; // if we call vvp with -N this will produce an exit code of 1
+      end else begin
+	 if (expected_number > 0) begin
+	    if ((result_addr != expected_addr) || (result_data != expected_data) ||
+		(result_datasize != expected_datasize) || (result_ct_dir != expected_ct_dir)) begin
+	       if (result_addr != expected_addr)
+		 $display("#ERR got addr %x, expected %x", result_addr, expected_addr);
+	       if (result_data != expected_data)
+		 $display("#ERR got data %x, expected %x", result_data, expected_data);
+	       if (result_datasize != expected_datasize)
+		 $display("#ERR got datasize %d, expected %d", result_datasize, expected_datasize);
+	       if (result_ct_dir != expected_ct_dir)
+		 $display("#ERR got ct_dir %x, expected %x", result_ct_dir, expected_ct_dir);
+	       
+	       $stop; // if we call vvp with -N this will produce an exit code of 1
+	    end // if ((result_addr != expected_addr) || (result_data != expected_data) ||...
+	 end // if (expected_number > 0)
+      end // else: !if(result_number != expected_number)
+   end
+endtask
