@@ -15,7 +15,7 @@ module lpc_tb ();
    localparam test_addr = 'h7fe5, test_data = 'h6c;
    
    /* expected results */
-   integer  expected_addr = test_addr;
+   integer     expected_addr = test_addr;
    integer  expected_data = test_data;
    integer  expected_datasize = 1;
    integer  expected_ct_dir = 0;
@@ -90,6 +90,7 @@ module lpc_tb ();
 
       if (result_number != 1) begin
 	 $display("#ERR got %d results", result_number);
+	 $stop; // if we call vvp with -N this will produce an exit code of 1
       end else begin
 	 if ((result_addr != expected_addr) || (result_data != expected_data) ||
 	     (result_datasize != expected_datasize) || (result_ct_dir != expected_ct_dir)) begin
@@ -101,17 +102,16 @@ module lpc_tb ();
 	      $display("#ERR got datasize %d, expected %d", result_datasize, expected_datasize);
 	    if (result_ct_dir != expected_ct_dir)
 	      $display("#ERR got ct_dir %x, expected %x", result_ct_dir, expected_ct_dir);
-	    // TODO: can we set the exit code of the simulation here?
-	 end else begin // if ((result_addr != expected_addr) || (result_data != expected_data) ||...
-	    $display("#DBG OK");
-	 end // else: !if((result_addr != expected_addr) || (result_data != expected_data) ||...
+	    
+	    $stop; // if we call vvp with -N this will produce an exit code of 1
+	 end
       end
       $finish;
       
    end // initial begin
 
    always @(posedge out_clock) begin
-      $display("#DBG LPC output addr %x data %x data_size %d ct_dir %x", addr, data, data_size, ct_dir);
+//      $display("#DBG LPC output addr %x data %x data_size %d ct_dir %x", addr, data, data_size, ct_dir);
       result_addr = addr;
       result_data = data;
       result_datasize = data_size;

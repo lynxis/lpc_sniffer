@@ -88,10 +88,11 @@ module lpc(
    reg [31:0] 		 addr;
    reg [31:0] 		 data;
 
+/*
    initial begin
       $monitor("lpc: state %d lpc_clock %d lpc_reset %d lpc_frame %d lpc_ad %x cyctype_dir %x", state, lpc_clock, lpc_reset, lpc_frame, lpc_ad, cyctype_dir);   
    end
-
+*/
    always @(negedge lpc_reset) begin
       state <= idle;
       out_clock_enable <= 0;

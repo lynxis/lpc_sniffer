@@ -7,7 +7,8 @@ $(NAME).bin: $(NAME).pcf $(NAME).v $(DEPS)
 	arachne-pnr -d 1k -p $(NAME).pcf $(NAME).blif -o $(NAME).txt
 	icepack $(NAME).txt $(NAME).bin
 
-testbenches: buffer_tb.vvp lpc_tb.vvp
+test: buffer_tb.vvp lpc_tb.vvp
+	for test in $^; do echo "#DBG running $$test"; vvp -N $$test || echo "#ERR test $$test failed"; done
 
 buffer_tb.vvp: buffer.v buffer_tb.v
 	iverilog -o $@ $^
@@ -18,4 +19,4 @@ lpc_tb.vvp: lpc.v lpc_tb.v
 clean:
 	rm -f $(NAME).blif $(NAME).txt $(NAME).ex $(NAME).bin *.vvp
 
-.PHONY: clean testbenches
+.PHONY: clean test

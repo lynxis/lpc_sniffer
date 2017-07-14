@@ -35,7 +35,7 @@ module buffer_tb ();
 		read_clock = 1; /* as does reading */
 		if (read_data != 'hf1) begin
 			$display("#ERR wrong data read at addr %x. expect data: %x, but read %x", read_addr, 'hf1, read_data);
-			$finish;
+			$stop;
 		end
 		#1;
 
@@ -48,7 +48,7 @@ module buffer_tb ();
 		#1;
 		if (read_data != 'hf1) begin
 			$display("#ERR read data changed even write_clock wasn\'t triggered. read addr %x. expect data: %x, but read %x", read_addr, 'hf1, read_data);
-			$finish;
+			$stop;
 		end
 
 		#1;
@@ -56,7 +56,7 @@ module buffer_tb ();
 		// overwrite old data and check if read gets overwritten
 		if (read_data != 'hf1) begin
 			$display("#ERR read data changed even read_clock wasn\'t triggered. read addr %x. expect data: %x, but read %x", read_addr, 'hf1, read_data);
-			$finish;
+			$stop;
 		end
 
 		#1
@@ -66,7 +66,7 @@ module buffer_tb ();
 	        #1
 		if (read_data != 'hee) begin
 			$display("#ERR read wrong data. read addr %x. expect data: %x, but read %x", read_addr, 'hee, read_data);
-			$finish;
+			$stop;
 		end
 
 	        /* write two addresses and check they are independent */
@@ -92,7 +92,7 @@ module buffer_tb ();
 	   #1;
 	   if (read_data != 'ha5) begin
 	      $display("#ERR read wrong data: addr %x: got %x expected %x", read_addr, read_data, 'ha5);
-	      $finish;
+	      $stop;
 	   end
 	   #1;
 
@@ -103,10 +103,10 @@ module buffer_tb ();
 	   #1;
 	   if (read_data != 'h5a) begin
 	      $display("#ERR read wrong data: addr %x: got %x expected %x", read_addr, read_data, 'ha5);
-	      $finish;
+	      $stop;
 	   end
 
 	 
-		$finish;
+	   $finish;
 	end
 endmodule
