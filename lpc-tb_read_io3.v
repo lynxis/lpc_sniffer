@@ -1,7 +1,7 @@
-/* IO read with more frame cycles at the start */
+/* IO read with short waitstate sync */
 `timescale 1 ns / 100 ps
 
-module lpc_tb_read_io2 ();
+module lpc_tb_read_io3 ();
 
    reg [3:0]   lpc_ad;
    reg 	       lpc_clock;
@@ -43,8 +43,8 @@ module lpc_tb_read_io2 ();
 `include "lpc_lib.v"
    
    initial begin
-      $dumpfile ("lpc-tb_read_io2.vcd");
-      $dumpvars (0, lpc_tb_read_io2);
+      $dumpfile ("lpc-tb_read_io3.vcd");
+      $dumpvars (0, lpc_tb_read_io3);
             
       // start with a LPC reset
       lpc_reset = 1;
@@ -53,8 +53,8 @@ module lpc_tb_read_io2 ();
 
       lpc_clock = 0; // all tasks require to have lpc_clock zero before
       
-      // LPC start: frame asserted for two cycles with ad == 4 and one cycle with ad == 0000
-      lpc_start(3, 4, 0);
+      // LPC start: frame asserted for one cycle with ad == 0000
+      lpc_start(1, 0, 0);
       
       // start with i/o read access
       lpc_ad = 4'b0000; // bit 3:2 = 0 --> i/o, bit 1 = 0 --> read
@@ -62,18 +62,16 @@ module lpc_tb_read_io2 ();
       #1 lpc_clock = 0;
       
       lpc_addr16(test_addr);
-
+      
       lpc_tar;
       
-      // sync from target - no wait
-      lpc_ad = 0;
-      #1 lpc_clock = 1;
-      #1 lpc_clock = 0;
-
+      lpc_shortsync(3);
+      lpc_sync;
+      
       lpc_data(test_data);
       
       lpc_tar;
-      
+
       // idle clock
       #1 lpc_clock = 1;
       #1 lpc_clock = 0;

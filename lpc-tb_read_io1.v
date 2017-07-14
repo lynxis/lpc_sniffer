@@ -1,6 +1,7 @@
+/* simple IO read */
 `timescale 1 ns / 100 ps
 
-module lpc_tb ();
+module lpc_tb_read_io1 ();
 
    reg [3:0]   lpc_ad;
    reg 	       lpc_clock;
@@ -42,8 +43,8 @@ module lpc_tb ();
 `include "lpc_lib.v"
    
    initial begin
-      $dumpfile ("lpc_tb.vcd");
-      $dumpvars (0, lpc_tb);
+      $dumpfile ("lpc-tb_read_io1.vcd");
+      $dumpvars (0, lpc_tb_read_io1);
             
       // start with a LPC reset
       lpc_reset = 1;
@@ -62,13 +63,8 @@ module lpc_tb ();
       
       lpc_addr16(test_addr);
       
-      // tar
-      lpc_ad = 4'bzzzz;
-      #1 lpc_clock = 1;
-      #1 lpc_clock = 0;
-      #1 lpc_clock = 1;
-      #1 lpc_clock = 0;
-
+      lpc_tar;
+      
       // sync from target - no wait
       lpc_ad = 0;
       #1 lpc_clock = 1;
@@ -76,14 +72,8 @@ module lpc_tb ();
 
       lpc_data(test_data);
       
+      lpc_tar;
       
-     // tar
-      lpc_ad = 4'bzzzz;
-      #1 lpc_clock = 1;
-      #1 lpc_clock = 0;
-      #1 lpc_clock = 1;
-      #1 lpc_clock = 0;
-
       // idle clock
       #1 lpc_clock = 1;
       #1 lpc_clock = 0;

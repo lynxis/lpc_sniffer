@@ -104,6 +104,17 @@ task lpc_shortsync;
    end
 endtask   
 
+//put two tar cycles on the bus
+task lpc_tar;
+   begin
+      lpc_ad = 4'bzzzz;
+      #1 lpc_clock = 1;
+      #1 lpc_clock = 0;
+      #1 lpc_clock = 1;
+      #1 lpc_clock = 0;
+   end
+endtask
+   
 //put nr_sync many long sync (lpc_ad == 6) on the bus
 // assume that lpc_clock is 0 when called
 // lpc_clock is 0 afterwards
