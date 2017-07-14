@@ -17,6 +17,6 @@ lpc_tb.vvp: lpc.v lpc_tb.v
 	iverilog -o $@ $^
 
 clean:
-	rm -f $(NAME).blif $(NAME).txt $(NAME).ex $(NAME).bin *.vvp
+	rm -f $(NAME).blif $(NAME).txt $(NAME).ex $(NAME).bin *.vvp *.vcd
 
 .PHONY: clean test
