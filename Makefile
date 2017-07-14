@@ -7,13 +7,13 @@ $(NAME).bin: $(NAME).pcf $(NAME).v $(DEPS)
 	arachne-pnr -d 1k -p $(NAME).pcf $(NAME).blif -o $(NAME).txt
 	icepack $(NAME).txt $(NAME).bin
 
-test: buffer_tb.vvp lpc_tb.vvp
-	for test in $^; do echo "#DBG running $$test"; vvp -N $$test || echo "#ERR test $$test failed"; done
+test: buffer_tb.vvp lpc_tb_read_io1.vvp
+	@for test in $^; do echo "#DBG running $$test"; vvp -N $$test || echo "#ERR test $$test failed"; done
 
 buffer_tb.vvp: buffer.v buffer_tb.v
 	iverilog -o $@ $^
 
-lpc_tb.vvp: lpc.v lpc_tb.v
+lpc_tb_read_io1.vvp: lpc.v lpc_tb_read_io1.v
 	iverilog -o $@ $^
 
 clean:
