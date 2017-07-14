@@ -12,8 +12,7 @@ $(NAME).bin: $(NAME).pcf $(NAME).v $(DEPS)
 
 test: $(TESTS_SRC)
 	-rm -f $(TESTS_BIN)
-	@for test in $^; do iverilog -o $${test}vp $${test%%-*}.v $$test; done
-	@for test in $^; do echo "#DBG running $${test}vp"; vvp -N $${test}vp || echo "#ERR test $$test failed"; done
+	./run_test.sh $^
 
 clean:
 	rm -f $(NAME).blif $(NAME).txt $(NAME).ex $(NAME).bin *.vvp *.vcd
