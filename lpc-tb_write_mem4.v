@@ -1,7 +1,7 @@
-/* two simple memory read, 32bit + 16 bit; first one has long syncs, second one has short sync */
+/* simple 32bit + 16 bit memory write */
 `timescale 1 ns / 100 ps
 
-module lpc_tb_read_mem5 ();
+module lpc_tb_write_mem4 ();
 
    reg [3:0]   lpc_ad;
    reg 	       lpc_clock;
@@ -13,15 +13,15 @@ module lpc_tb_read_mem5 ();
    wire [2:0] 	data_size;
    wire        out_clock;
 
-   localparam test_addr = 'haffe7fe5, test_data = 'hdf6c;
+   localparam test_addr = 'h12347fe5, test_data = 'h69ce;
    
    /* expected results */
    integer     expected_addr = test_addr;
    integer  expected_data = test_data;
    integer  expected_datasize = 2;
-   integer  expected_ct_dir = 4;
-   integer  expected_number = 2; // we expect two dataset
-
+   integer  expected_ct_dir = 4'b0110;
+   integer  expected_number = 2;
+   
    /* the actual results we get */
    integer  result_addr;
    integer  result_data;
@@ -44,9 +44,9 @@ module lpc_tb_read_mem5 ();
 `include "lpc_lib.v"
    
    initial begin
-      $dumpfile ("lpc-tb_read_mem5.vcd");
-      $dumpvars (0, lpc_tb_read_mem5);
-
+      $dumpfile ("lpc-tb_write_mem4.vcd");
+      $dumpvars (0, lpc_tb_write_mem4);
+            
       lpc_assert_reset;
       
       lpc_clock = 0; // all tasks require to have lpc_clock zero before
@@ -55,20 +55,18 @@ module lpc_tb_read_mem5 ();
       lpc_start(1, 0, 0);
 
       // start with mem read access
-      // bit 3:2 = 1 --> mem, bit 1 = 0 --> read
-      lpc_ctdir(4'b0100);
-
+      // bit 3:2 = 1 --> mem, bit 1 = 1 --> write
+      lpc_ctdir(4'b0110);
+      
       lpc_size(3); // 4 bytes
       
       lpc_addr32(test_addr-1);
       
-      lpc_tar;
-
-      lpc_longsync(4); //4 long syncs
-      lpc_sync; // last sync must be a nowait sync
-      
-      
       lpc_data32(test_data-1);
+      
+      lpc_tar;
+      
+      lpc_sync;
       
       lpc_tar;
       
@@ -76,21 +74,21 @@ module lpc_tb_read_mem5 ();
       lpc_start(1, 0, 0);
 
       // start with mem read access
-      // bit 3:2 = 1 --> mem, bit 1 = 0 --> read
-      lpc_ctdir(4'b0100);
-
+      // bit 3:2 = 1 --> mem, bit 1 = 1 --> write
+      lpc_ctdir(4'b0110);
+      
       lpc_size(1); // 2 bytes
       
       lpc_addr32(test_addr);
       
-      lpc_tar;
-
-      lpc_shortsync(1);
-      lpc_sync; //no-wait sync
-      
-      lpc_data32(test_data);
+      lpc_data16(test_data);
       
       lpc_tar;
+      
+      lpc_sync;
+      
+      lpc_tar;
+      
       
       // idle clock
       #1 lpc_clock = 1;
