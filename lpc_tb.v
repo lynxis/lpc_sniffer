@@ -12,10 +12,20 @@ module lpc_tb ();
    wire [3:0] 	data_size;
    wire        out_clock;
 
+   localparam test_addr = 'h7fe5, test_data = 'h6c;
+   
+   /* expected results */
+   integer  expected_addr = test_addr;
+   integer  expected_data = test_data;
+   integer  expected_datasize = 1;
+   integer  expected_ct_dir = 0;
 
-   integer  test_addr;
-   integer  test_data;
-
+   /* the actual results we get */
+   integer  result_addr;
+   integer  result_data;
+   integer  result_datasize;
+   integer  result_ct_dir;
+   integer  result_number = 0;
    
    lpc UUT (
 	    .lpc_ad(lpc_ad),
@@ -34,11 +44,7 @@ module lpc_tb ();
    initial begin
       $dumpfile ("lpc_tb.vcd");
       $dumpvars (0, lpc_tb);
-      
-      // test data and address
-      test_addr = 32'h7fe5;
-      test_data = 32'h6c;
-      
+            
       // start with a LPC reset
       lpc_reset = 1;
       #1 lpc_reset = 0;
@@ -81,13 +87,37 @@ module lpc_tb ();
       // idle clock
       #1 lpc_clock = 1;
       #1 lpc_clock = 0;
-      
+
+      if (result_number != 1) begin
+	 $display("#ERR got %d results", result_number);
+      end else begin
+	 if ((result_addr != expected_addr) || (result_data != expected_data) ||
+	     (result_datasize != expected_datasize) || (result_ct_dir != expected_ct_dir)) begin
+	    if (result_addr != expected_addr)
+	       $display("#ERR got addr %x, expected %x", result_addr, expected_addr);
+	    if (result_data != expected_data)
+	      $display("#ERR got data %x, expected %x", result_data, expected_data);
+	    if (result_datasize != expected_datasize)
+	      $display("#ERR got datasize %d, expected %d", result_datasize, expected_datasize);
+	    if (result_ct_dir != expected_ct_dir)
+	      $display("#ERR got ct_dir %x, expected %x", result_ct_dir, expected_ct_dir);
+	    // TODO: can we set the exit code of the simulation here?
+	 end else begin // if ((result_addr != expected_addr) || (result_data != expected_data) ||...
+	    $display("#DBG OK");
+	 end // else: !if((result_addr != expected_addr) || (result_data != expected_data) ||...
+      end
       $finish;
       
    end // initial begin
 
    always @(posedge out_clock) begin
       $display("#DBG LPC output addr %x data %x data_size %d ct_dir %x", addr, data, data_size, ct_dir);
+      result_addr = addr;
+      result_data = data;
+      result_datasize = data_size;
+      result_ct_dir = ct_dir;
+      result_number = result_number + 1;
+      
       //TODO: check for correct values
    end
  

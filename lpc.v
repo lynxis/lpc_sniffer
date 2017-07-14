@@ -7,7 +7,7 @@
  * out_cyctype_dir: type and direction. same as in LPC Spec 1.1
  * out_addr: 32 bit address (for IO access only the lower 16 bit are used)
  * out_data: data read or written (1,2 or 4 byte)
- * out_data_size: 0 -> 1 byte, 1 -> 2 bytes, 3 -> 4 bytes 
+ * out_data_size: 1,2,4
  * out_clock_enable: on rising edge all data are valid.
  */
 
@@ -67,16 +67,22 @@ module lpc(
    reg [3:0] 		 data_size;
    localparam size_1 = 0, size_2 = 1, size_4 = 3; // possible values for data_size (in bytes)
 
+   // translate size lpc_ad (0,1,3) into values 1,2 or 4
+   // return 0 for invalid ad values
+   function get_size;
+      input  ad;
+      case (ad)
+	 0: get_size = 1;
+	 1: get_size = 2;
+	 3: get_size = 4;
+	 default: get_size = 0;
+      endcase; // case (ad)
+   endfunction
+   
    // return 1 if  ct_dir encodes a write access
    function is_write;
       input [3:0] 	 ct_dir;
       is_write = ct_dir[1];
-   endfunction
-   
-   // return 1 if size is a valid size
-   function is_valid_size;
-      input 		 sz;
-      is_valid_size = (sz == size_1) || (sz == size_2) || (sz == size_4);
    endfunction
    
    reg [31:0] 		 addr;
@@ -120,7 +126,7 @@ module lpc(
 		     2'b00: begin /* i/o */
 			addr[31:16] <= 0;
 			state <= addr3;
-			data_size <= size_1; // we set data_size here as there is no size state for i/o cycles
+			data_size <= 1; // we set data_size here as there is no size state for i/o cycles
 		     end
 		     2'b01: /* memory */
 		       state <= size;
@@ -131,8 +137,9 @@ module lpc(
 	     end // case: cycle_dir
 
 	     size: begin
-		data_size <= lpc_ad;
-		if (is_valid_size(lpc_ad))
+		data_size <= get_size(lpc_ad);
+		if (data_size != 0)
+		  // valid data size
 		  state <= addr7; //memory access always have 32 bit addresses
 		else
 		  state <= idle; // invalid size
@@ -196,7 +203,7 @@ module lpc(
 
 	     data1: begin
 		data [7:4] <= lpc_ad;
-		state <= (data_size == size_2 || data_size == size_4) ? data2 : tarD_1;
+		state <= (data_size == 2 || data_size == 4) ? data2 : tarD_1;
 	     end
 
 	     data2: begin
@@ -206,7 +213,7 @@ module lpc(
 
 	     data3: begin
 		data [15:12] <= lpc_ad;
-		state <= (data_size == size_4) ? data4 : tarD_1;
+		state <= (data_size == 4) ? data4 : tarD_1;
 	     end
 
 	     data4: begin
