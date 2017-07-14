@@ -53,6 +53,28 @@ task lpc_data;
    end
 endtask // load_data
 
+//put a 16 bit data on the bus
+// assume that lpc_clock is 0 when called
+// lpc_clock is 0 afterwards
+task lpc_data16;
+   input integer data;
+   begin
+      lpc_data(data & 'hff);
+      lpc_data(data >> 8);
+   end
+endtask // lpc_data16
+
+//put a 32 bit data on the bus
+// assume that lpc_clock is 0 when called
+// lpc_clock is 0 afterwards
+task lpc_data32;
+   input integer data;
+   begin
+      lpc_data16(data & 'hffff);
+      lpc_data16(data >> 16);
+   end
+endtask // lpc_data32
+
 // send a lpc start frame
 // assume that lpc_clock is 0 when called
 // lpc_clock is 0 afterwards
