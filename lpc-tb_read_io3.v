@@ -10,7 +10,7 @@ module lpc_tb_read_io3 ();
    wire [3:0]  ct_dir;
    wire [31:0] addr;
    wire [31:0]  data;
-   wire [3:0] 	data_size;
+   wire [2:0] 	data_size;
    wire        out_clock;
 
    localparam test_addr = 'h7fe5, test_data = 'h6c;

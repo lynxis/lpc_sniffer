@@ -19,7 +19,7 @@ module lpc(
 	   output [3:0]  out_cyctype_dir,
 	   output [31:0] out_addr,
 	   output [31:0] out_data,
-	   output [3:0]  out_data_size, 
+	   output [2:0]  out_data_size, 
 	   output reg 	 out_clock_enable);
 
    /* type and direction. same as in LPC Spec 1.1 */
@@ -69,14 +69,9 @@ module lpc(
 
    // translate size lpc_ad (0,1,3) into values 1,2 or 4
    // return 0 for invalid ad values
-   function get_size;
-      input  ad;
-      case (ad)
-	 0: get_size = 1;
-	 1: get_size = 2;
-	 3: get_size = 4;
-	 default: get_size = 0;
-      endcase; // case (ad)
+   function [2:0] get_data_size;
+      input 	[3:0]	 ad;
+      get_data_size = (ad == 0) ? 1 : (ad == 1) ? 2 : (ad == 3) ? 4 : 0;
    endfunction
    
    // return 1 if  ct_dir encodes a write access
@@ -140,8 +135,9 @@ module lpc(
 	     end // case: cycle_dir
 
 	     size: begin
-		data_size <= get_size(lpc_ad);
-		if (get_size(lpc_ad) != 0)
+		data_size <= get_data_size(lpc_ad);
+		
+		if (get_data_size(lpc_ad) != 0)
 		  // valid data size
 		  state <= addr7; //memory access always have 32 bit addresses
 		else
