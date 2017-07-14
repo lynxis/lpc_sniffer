@@ -1,7 +1,7 @@
-/* simple memory read, 32bit */
+/* two simple memory read, 32bit + 16 bit */
 `timescale 1 ns / 100 ps
 
-module lpc_tb_read_mem3 ();
+module lpc_tb_read_mem4 ();
 
    reg [3:0]   lpc_ad;
    reg 	       lpc_clock;
@@ -13,14 +13,14 @@ module lpc_tb_read_mem3 ();
    wire [2:0] 	data_size;
    wire        out_clock;
 
-   localparam test_addr = 'haffe7fe5, test_data = 'h1234df6c;
+   localparam test_addr = 'haffe7fe5, test_data = 'hdf6c;
    
    /* expected results */
    integer     expected_addr = test_addr;
    integer  expected_data = test_data;
-   integer  expected_datasize = 4;
+   integer  expected_datasize = 2;
    integer  expected_ct_dir = 4;
-   integer  expected_number = 1; // we expect one dataset
+   integer  expected_number = 2; // we expect two dataset
 
    /* the actual results we get */
    integer  result_addr;
@@ -44,8 +44,8 @@ module lpc_tb_read_mem3 ();
 `include "lpc_lib.v"
    
    initial begin
-      $dumpfile ("lpc-tb_read_mem3.vcd");
-      $dumpvars (0, lpc_tb_read_mem3);
+      $dumpfile ("lpc-tb_read_mem4.vcd");
+      $dumpvars (0, lpc_tb_read_mem4);
 
       lpc_assert_reset;
       
@@ -59,6 +59,25 @@ module lpc_tb_read_mem3 ();
       lpc_ctdir(4'b0100);
 
       lpc_size(3); // 4 bytes
+      
+      lpc_addr32(test_addr-1);
+      
+      lpc_tar;
+
+      lpc_sync; //no-wait sync
+      
+      lpc_data32(test_data-1);
+      
+      lpc_tar;
+      
+      // LPC start: frame asserted for one cycle with ad == 0000
+      lpc_start(1, 0, 0);
+
+      // start with mem read access
+      // bit 3:2 = 1 --> mem, bit 1 = 0 --> read
+      lpc_ctdir(4'b0100);
+
+      lpc_size(1); // 2 bytes
       
       lpc_addr32(test_addr);
       

@@ -1,4 +1,4 @@
-/* simple memory read, 8bit */
+/* simple memory read, 16bit */
 `timescale 1 ns / 100 ps
 
 module lpc_tb_read_mem2 ();
