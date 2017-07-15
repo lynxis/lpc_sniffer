@@ -1,19 +1,8 @@
 # TODO
 
-## LPC modes
-* implement memory read / writes
-* abort on LPCFRAME# when driving not in idle mode
-
 ## Testbench for every module
 
 every module needs a testbench
-
-### lpc
-
-* check if lpc\_frame can abort a cycle
-* check lpc\_reset
-* check i/o read / write
-* check memory read / write
 
 ### lpc2mem
 
