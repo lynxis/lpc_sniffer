@@ -2,8 +2,8 @@ module mem2serial #(parameter AW = 8)
 	(
 		output reg read_clock_enable,
 		input [47:0] read_data,
-		input read_empty,
-		input reset,
+		input read_empty, // high is input is empty
+		input reset, // active low
 		input clock,
 
 		input uart_ready,
