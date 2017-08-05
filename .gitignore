@@ -4,3 +4,4 @@ top.ex
 top.txt
 *.sw?
 *.vcd
+*.vvp
