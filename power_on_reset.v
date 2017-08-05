@@ -9,7 +9,7 @@ always @(*) begin
 		reset = 0;
 end
 
-always @(posedge clock) begin
+always @(negedge clock) begin
 	if (counter != 0)
 		counter <= counter - 1;
 end
