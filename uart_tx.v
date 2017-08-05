@@ -58,7 +58,7 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 		end
 	end
 
-	always @(posedge uart_clock or negedge reset) begin
+	always @(negedge uart_clock or negedge reset) begin
 		if (~reset) begin
 			state <= IDLE;
 		end
