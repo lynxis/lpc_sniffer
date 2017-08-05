@@ -84,7 +84,7 @@ module lpc(
 								counter <= 2;
 							end
 							else
-								state <= idle; /* dma or reserved */
+								state <= idle; /* unsupported dma or reserved */
 					read_data: begin
 						state <= idle;
 					end
