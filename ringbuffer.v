@@ -52,7 +52,7 @@ module ringbuffer #(parameter AW = 8, DW = 48)
 		end
 	end
 
-	buffer #(.AW(8), .DW(48))
+	buffer #(.AW(AW), .DW(DW))
 		MEM (
 			.clock(clock),
 			.write_clock_enable(write_clock_enable),
