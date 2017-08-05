@@ -1,6 +1,6 @@
 module power_on_reset(input clock, output reg reset);
 
-reg [7:0] counter = 254;
+reg [31:0] counter = 32'h2dc6c00;
 
 always @(*) begin
 	if (counter == 0)
