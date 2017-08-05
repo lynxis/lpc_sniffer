@@ -34,23 +34,32 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 			divider <= divider + 1;
 	end
 
-	always @(posedge clock or negedge reset) begin
-		if (~reset)
+	always @(negedge clock or negedge reset) begin
+		if (~reset) begin
 			new_data <= 0;
+			ready <= 0;
+		end
 		else begin
-			if (read_clock_enable && ready) begin
-				data <= read_data;
-				new_data <= 1;
+			if (state == IDLE) begin
+				if (read_clock_enable) begin
+					data <= read_data;
+					new_data <= 1;
+					ready <= 0;
+				end
+				else
+					if (~new_data)
+						ready <= 1;
 			end
 			else begin
-				new_data <= 0;
+				if (state == START_BIT)
+					new_data <= 0;
+				ready <= 0;
 			end
 		end
 	end
 
 	always @(posedge uart_clock or negedge reset) begin
 		if (~reset) begin
-			ready <= 0;
 			state <= IDLE;
 		end
 		else begin
@@ -59,11 +68,8 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 					tx <= 1;
 					if (new_data) begin
 						parity <= 1;
-						ready <= 0;
 						state <= START_BIT;
 					end
-					else
-						ready <= 1;
 				end
 				START_BIT: begin
 					tx <= 0;
@@ -77,7 +83,7 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 						parity <= ~parity;
 
 					if (bit_pos == 7)
-						state <= PARITY;
+						state <= STOP_BIT;
 					else
 						bit_pos <= bit_pos + 1;
 				end
