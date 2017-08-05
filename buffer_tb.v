@@ -12,10 +12,11 @@ module buffer_tb ();
 
 	buffer #(.AW(8), .DW(8))
 		MEM (
-			.write_clock(write_clock),
+			.clock(clock),
+			.write_clock_enable(read_clock_enable),
 			.write_data(write_data),
 			.write_addr(write_addr),
-			.read_clock(read_clock),
+			.read_clock_enable(read_clock_enable),
 			.read_data(read_data),
 			.read_addr(read_addr));
 
