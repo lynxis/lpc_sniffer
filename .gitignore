@@ -3,3 +3,4 @@ top.blif
 top.ex
 top.txt
 *.sw?
+*.vcd
