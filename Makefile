@@ -7,6 +7,11 @@ $(NAME).bin: $(NAME).pcf $(NAME).v $(DEPS)
 	arachne-pnr -d 1k -p $(NAME).pcf $(NAME).blif -o $(NAME).txt
 	icepack $(NAME).txt $(NAME).bin
 
+helloworld.bin: helloworld.v mem2serial.v buffer.v power_on_reset.v
+	yosys -p "synth_ice40 -blif helloworld.blif" helloworld.v mem2serial.v ringbuffer.v buffer.v uart_tx.v power_on_reset.v helloworldwriter.v
+	arachne-pnr -d 1k -p helloworld.pcf helloworld.blif -o helloworld.txt
+	icepack helloworld.txt helloworld.bin
+
 buffer.vcd: buffer_tb.v buffer.v
 	iverilog -o buffer_tb.vcd buffer_tb.v buffer.v
 
