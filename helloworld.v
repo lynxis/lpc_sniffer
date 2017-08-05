@@ -46,15 +46,12 @@ module helloworld #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 11520
 			.empty(empty),
 			.overflow(overflow));
 
-	assign read_data_static = 48'h216f6c6c6568;
-	assign empty_static = 0;
-
 	mem2serial MEM_SERIAL(
 		.reset(reset),
 		.clock(ext_clock),
-		.read_empty(empty_static),
+		.read_empty(empty),
 		.read_clock_enable(read_clock_enable),
-		.read_data(read_data_static),
+		.read_data(read_data),
 		.uart_clock_enable(uart_clock_enable),
 		.uart_ready(uart_ready),
 		.uart_data(uart_data));
