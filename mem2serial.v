@@ -10,14 +10,12 @@ module mem2serial #(parameter AW = 8)
 		output reg [7:0] uart_data,
 		output reg uart_clock_enable);
 
-	parameter idle = 0,
-		start_byte_1 = 1, complete_tx_start_byte_1 = 2,
-		start_byte_2 = 3, complete_tx_start_byte_2 = 4,
-		read_lpc_memory = 5, complete_tx_read_lpc_memory = 6;
-	reg [2:0] state;
-	reg [2:0] lower_addr;
+	parameter idle = 0, write_data = 1, wait_write_done = 2;
+	reg [1:0] state;
+	reg [7:0] write_pos;
+	reg [47:0] data;
 
-	always @(negedge reset or posedge clock) begin
+	always @(negedge reset or negedge clock) begin
 		if (~reset) begin
 			state <= idle;
 			uart_clock_enable <= 0;
@@ -26,66 +24,39 @@ module mem2serial #(parameter AW = 8)
 		else
 			case (state)
 				idle: begin
-					if (~read_empty) begin
-						state <= start_byte_1;
-						lower_addr <= 0;
+					if (~read_empty)
+						if (read_clock_enable) begin
+							data <= read_data;
+							state <= write_data;
+							read_clock_enable <= 0;
+							write_pos <= 0;
+						end else
+							read_clock_enable <= 1;
+					else
 						read_clock_enable <= 0;
-					end
 				end
-				start_byte_1: begin
-					if (uart_ready)
-						uart_data <= 8'hff;
-						state <= complete_tx_start_byte_1;
-						uart_clock_enable <= 1;
+				write_data: begin
+					if (write_pos >= 48)
+						state <= idle;
+					else
+						if (uart_ready) begin
+							uart_data[7] <= data[write_pos + 7];
+							uart_data[6] <= data[write_pos + 6];
+							uart_data[5] <= data[write_pos + 5];
+							uart_data[4] <= data[write_pos + 4];
+							uart_data[3] <= data[write_pos + 3];
+							uart_data[2] <= data[write_pos + 2];
+							uart_data[1] <= data[write_pos + 1];
+							uart_data[0] <= data[write_pos + 0];
+							uart_clock_enable <= 1;
+							write_pos <= write_pos + 8;
+							state <= wait_write_done;
+						end
 				end
-				complete_tx_start_byte_1: begin
+				wait_write_done: begin
 					if (~uart_ready) begin
-						state <= start_byte_2;
 						uart_clock_enable <= 0;
-					end
-				end
-				start_byte_2: begin
-					if (uart_ready) begin
-						uart_data <= 8'hff;
-						state <= complete_tx_start_byte_2;
-						uart_clock_enable <= 1;
-					end
-				end
-				complete_tx_start_byte_2: begin
-					if (~uart_ready) begin
-						state <= read_lpc_memory;
-						uart_clock_enable <= 0;
-					end
-				end
-				read_lpc_memory: begin
-					if (lower_addr >= 6) begin
-						state <= idle; /* finished lpc frame */
-						read_clock_enable <= 1;
-					end
-					else if (uart_ready) begin
-						case (lower_addr)
-							0:
-								uart_data <= read_data[7:0];
-							1:
-								uart_data <= read_data[15:8];
-							2:
-								uart_data <= read_data[23:16];
-							3:
-								uart_data <= read_data[31:24];
-							4:
-								uart_data <= read_data[39:32];
-							5:
-								uart_data <= read_data[47:40];
-						endcase
-						uart_clock_enable <= 1;
-						state <= complete_tx_read_lpc_memory;
-					end
-				end
-				complete_tx_read_lpc_memory: begin
-					if (~uart_ready) begin
-						state <= read_lpc_memory; /* last state check in read_lpc_memory */
-						uart_clock_enable <= 0;
-						lower_addr <= lower_addr + 1;
+						state <= write_data;
 					end
 				end
 			endcase

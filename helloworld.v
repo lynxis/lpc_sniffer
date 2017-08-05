@@ -23,6 +23,8 @@ module helloworld #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 11520
 	wire [7:0] uart_data;
 	wire uart_clock_enable;
 	wire uart_clock;
+	wire [47:0] read_data_static;
+	wire empty_static;
 
 	power_on_reset POR(
 		.clock(ext_clock),
@@ -44,12 +46,15 @@ module helloworld #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 11520
 			.empty(empty),
 			.overflow(overflow));
 
+	assign read_data_static = 48'h216f6c6c6568;
+	assign empty_static = 0;
+
 	mem2serial MEM_SERIAL(
 		.reset(reset),
 		.clock(ext_clock),
-		.read_empty(empty),
+		.read_empty(empty_static),
 		.read_clock_enable(read_clock_enable),
-		.read_data(read_data),
+		.read_data(read_data_static),
 		.uart_clock_enable(uart_clock_enable),
 		.uart_ready(uart_ready),
 		.uart_data(uart_data));
