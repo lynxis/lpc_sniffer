@@ -9,17 +9,16 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 	output reg tx,
 	output reg uart_clock);
 
-	reg [7:0] data;
+	reg [9:0] data;
 
-	localparam CLOCKS_PER_BIT = CLOCK_FREQ / BAUD_RATE;
-	reg [6:0] divider;
+	localparam CLOCKS_PER_BIT = CLOCK_FREQ / BAUD_RATE / 2;
+	reg [24:0] divider;
 
 	reg new_data;
-	reg [2:0] state;
-	reg [2:0] bit_pos; /* which is the next bit we transmit */
-	reg parity;
+	reg state;
+	reg [3:0] bit_pos; /* which is the next bit we transmit */
 
-	localparam IDLE = 3'h0, START_BIT = 3'h1, DATA = 3'h2, PARITY = 3'h3, STOP_BIT = 3'h4;
+	localparam IDLE = 1'h0, DATA = 1'h1;
 
 	always @(negedge reset or posedge clock) begin
 		if (~reset) begin
@@ -36,25 +35,26 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 
 	always @(negedge clock or negedge reset) begin
 		if (~reset) begin
-			new_data <= 0;
 			ready <= 0;
+			new_data <= 0;
 		end
 		else begin
 			if (state == IDLE) begin
-				if (read_clock_enable) begin
-					data <= read_data;
-					new_data <= 1;
-					ready <= 0;
-				end
-				else
-					if (~new_data)
+				if (~new_data)
+					if (~ready)
 						ready <= 1;
+					else if (read_clock_enable) begin
+						/* stop bit */
+						data[0] <= 0;
+						data[8:1] <= read_data;
+						/* start bit */
+						data[9] <= 1;
+						new_data <= 1;
+						ready <= 0;
+					end
 			end
-			else begin
-				if (state == START_BIT)
-					new_data <= 0;
-				ready <= 0;
-			end
+			else
+				new_data <= 0;
 		end
 	end
 
@@ -67,37 +67,17 @@ module uart_tx #(parameter CLOCK_FREQ = 12_000_000, BAUD_RATE = 115_200)
 				IDLE: begin
 					tx <= 1;
 					if (new_data) begin
-						parity <= 1;
-						state <= START_BIT;
+						state <= DATA;
+						bit_pos <= 0;
 					end
-				end
-				START_BIT: begin
-					tx <= 0;
-					state <= DATA;
-					bit_pos <= 0;
 				end
 				DATA: begin
 					tx <= data[bit_pos];
-
-					if (data[bit_pos])
-						parity <= ~parity;
-
-					if (bit_pos == 7)
-						state <= STOP_BIT;
+					if (bit_pos == 9)
+						state <= IDLE;
 					else
 						bit_pos <= bit_pos + 1;
 				end
-
-				PARITY: begin
-					tx <= parity;
-					state <= STOP_BIT;
-				end
-
-				STOP_BIT: begin
-					tx <= 1;
-					state <= IDLE;
-				end
-				default: begin end
 			endcase
 		end
 	end
