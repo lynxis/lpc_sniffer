@@ -19,7 +19,7 @@ module lpc(
 	output [3:0] out_cyctype_dir,
 	output [31:0] out_addr,
 	output [7:0] out_data,
-	output out_clock_enable);
+	output reg out_clock_enable);
 
 	/* type and direction. same as in LPC Spec 1.1 */
 
@@ -41,10 +41,10 @@ module lpc(
 	always @(posedge lpc_clock or negedge lpc_reset) begin
 		if (~lpc_reset) begin
 			state <= idle;
-			counter <=  0;
+			counter <= 1;
 		end
 		else begin
-			if (counter != 0)
+			if (counter == 1)
 				counter <= counter - 1;
 			else
 				case (state)
@@ -89,6 +89,7 @@ module lpc(
 					read_data: begin
 						state <= idle;
 					end
+					/* todo: missing TAR after read_data */
 
 					abort: begin /* lpc abort */
 						counter <= 2;
@@ -151,9 +152,9 @@ module lpc(
 
 			read_data: begin
 				case (counter)
-					1:
+					2:
 						data[7:4] <= lpc_ad[3:0];
-					0: begin
+					1: begin
 						out_clock_enable <= 1;
 						data[3:0] <= lpc_ad[3:0];
 					end
