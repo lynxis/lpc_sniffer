@@ -38,7 +38,7 @@ module lpc(
 	reg [31:0] addr;
 	reg [7:0] data;
 
-	always @(posedge lpc_clock or negedge lpc_reset) begin
+	always @(negedge lpc_clock or negedge lpc_reset) begin
 		if (~lpc_reset) begin
 			state <= idle;
 			counter <= 1;
