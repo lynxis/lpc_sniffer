@@ -57,7 +57,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	assign write_data[7:4] = 0;
 	assign write_data[3:0] = dec_cyctype_dir;
 
-	ringbuffer #(.AW(8), .DW(48))
+	ringbuffer #(.AW(10), .DW(48))
 		RINGBUFFER (
 			.reset(reset),
 			.clock(ext_clock),
