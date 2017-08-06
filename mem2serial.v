@@ -10,8 +10,9 @@ module mem2serial #(parameter AW = 8)
 		output reg [7:0] uart_data,
 		output reg uart_clock_enable);
 
-	parameter idle = 0, write_data = 1, wait_write_done = 2;
-	reg [1:0] state;
+	parameter idle = 0, write_data = 1, wait_write_done = 2,
+		write_trailer = 3, wait_write_trailer_done = 4;
+	reg [2:0] state;
 	reg [7:0] write_pos;
 	reg [47:0] data;
 
@@ -20,6 +21,7 @@ module mem2serial #(parameter AW = 8)
 			state <= idle;
 			uart_clock_enable <= 0;
 			read_clock_enable <= 0;
+			write_pos <= 00;
 		end
 		else
 			case (state)
@@ -29,16 +31,13 @@ module mem2serial #(parameter AW = 8)
 							data <= read_data;
 							state <= write_data;
 							read_clock_enable <= 0;
-							write_pos <= 0;
+							write_pos <= 40;
 						end else
 							read_clock_enable <= 1;
 					else
 						read_clock_enable <= 0;
 				end
 				write_data: begin
-					if (write_pos >= 48)
-						state <= idle;
-					else
 						if (uart_ready) begin
 							uart_data[7] <= data[write_pos + 7];
 							uart_data[6] <= data[write_pos + 6];
