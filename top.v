@@ -47,6 +47,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.lpc_clock(lpc_clock),
 		.lpc_frame(lpc_frame),
 		.lpc_reset(lpc_reset),
+		.reset(reset),
 		.out_cyctype_dir(dec_cyctype_dir),
 		.out_addr(dec_addr),
 		.out_data(dec_data),
