@@ -32,10 +32,13 @@ module helloworld #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 11520
 
 	/* write hello world */
 	helloworldwriter HELLOWORLDWRITER(
+		.clock(ext_clock),
+		.reset(reset),
+		.overflow(overflow),
 		.out_data(write_data),
 		.out_clock_enable(write_clock_enable));
 
-	ringbuffer #(.AW(8), .DW(48))
+	ringbuffer #(.AW(10), .DW(48))
 		RINGBUFFER (
 			.reset(reset),
 			.clock(ext_clock),
