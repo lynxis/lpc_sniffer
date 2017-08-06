@@ -14,6 +14,9 @@ module ringbuffer #(parameter AW = 8, DW = 48)
 	reg [AW-1:0] read_addr;
 	reg [AW-1:0] write_addr;
 
+	wire mem_read_clock_enable;
+	wire mem_write_clock_enable;
+
 	always @(*) begin
 		if (read_addr == write_addr)
 			empty = 1;
@@ -52,13 +55,16 @@ module ringbuffer #(parameter AW = 8, DW = 48)
 		end
 	end
 
+	assign mem_read_clock_enable = ~empty & read_clock_enable;
+	assign mem_write_clock_enable = ~overflow & write_clock_enable;
+
 	buffer #(.AW(AW), .DW(DW))
 		MEM (
 			.clock(clock),
-			.write_clock_enable(write_clock_enable),
+			.write_clock_enable(mem_write_clock_enable),
 			.write_data(write_data),
 			.write_addr(write_addr),
-			.read_clock_enable(read_clock_enable),
+			.read_clock_enable(mem_read_clock_enable),
 			.read_data(read_data),
 			.read_addr(read_addr));
 endmodule
