@@ -48,14 +48,43 @@ module mem2serial #(parameter AW = 8)
 							uart_data[1] <= data[write_pos + 1];
 							uart_data[0] <= data[write_pos + 0];
 							uart_clock_enable <= 1;
-							write_pos <= write_pos + 8;
+							write_pos <= write_pos - 8;
 							state <= wait_write_done;
 						end
 				end
 				wait_write_done: begin
 					if (~uart_ready) begin
 						uart_clock_enable <= 0;
-						state <= write_data;
+						if (write_pos > 40) begin /* overflow. finished writing */
+							write_pos <= 0;
+							state <= write_trailer;
+						end else
+							state <= write_data;
+					end
+				end
+				write_trailer: begin
+					if (uart_ready) begin
+						if (write_pos == 0) begin
+							uart_clock_enable <= 1;
+							uart_data <= 'h0a;
+							state <= wait_write_trailer_done;
+						end
+						else if (write_pos == 1) begin
+							uart_clock_enable <= 1;
+							uart_data <= 'h0d;
+							state <= wait_write_trailer_done;
+						end
+						else if (write_pos >= 2) begin
+							state <= idle;
+						end
+
+						write_pos <= write_pos + 1;
+					end
+				end
+				wait_write_trailer_done: begin
+					if (~uart_ready) begin
+						uart_clock_enable <= 0;
+						state <= write_trailer;
 					end
 				end
 			endcase
