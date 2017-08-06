@@ -9,7 +9,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	output lpc_clock_led,
 	output lpc_frame_led,
 	output lpc_reset_led,
-	output uart_tx_led,
+	output valid_lpc_output_led,
 	output overflow_led);
 
 	/* power on reset */
@@ -89,9 +89,14 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 			.clock(ext_clock),
 			.uart_clock(uart_clock));
 
+	trigger_led TRIGGERLPC(
+		.reset(reset),
+		.clock(ext_clock),
+		.led(valid_lpc_output_led),
+		.trigger(write_clock_enable));
+
 	assign lpc_clock_led = lpc_clock;
 	assign lpc_frame_led = ~lpc_frame;
 	assign lpc_reset_led = ~lpc_reset;
-	assign uart_tx_led = uart_tx_pin;
 	assign overflow_led = overflow;
 endmodule
