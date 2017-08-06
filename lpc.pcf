@@ -1,7 +1,0 @@
-set_io lpc_ad[0] 99
-set_io lpc_ad[1] 98
-set_io lpc_ad[2] 97
-set_io lpc_ad[3] 96
-set_io lpc_clock 95
-set_io lpc_frame 94
-set_io lpc_reset 93
