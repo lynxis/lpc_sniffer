@@ -15,6 +15,7 @@ module lpc(
 	input lpc_clock,
 	input lpc_frame,
 	input lpc_reset,
+	input reset,
 	output [3:0] out_cyctype_dir,
 	output [31:0] out_addr,
 	output [7:0] out_data,
@@ -96,11 +97,14 @@ module lpc(
 		end
 	end
 
-	always @(posedge lpc_clock)
-	begin
+	always @(negedge lpc_clock or negedge reset) begin
+	if (~reset)
+		out_clock_enable <= 0;
+	else
 		case (state)
 			// wait for start segment
 			idle: begin
+				out_clock_enable <= 0;
 			end
 
 			cycle_dir: begin
