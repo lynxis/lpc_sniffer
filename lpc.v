@@ -53,11 +53,11 @@ module lpc(
 						if (~lpc_frame && lpc_ad == 4'b0000)
 							state <= cycle_dir;
 					cycle_dir: begin
-						if (cyctype_dir[3:2] == 2'b00) begin /* i/o */
+						if (lpc_ad[3:2] == 2'b00) begin /* i/o */
 							state <= address;
 							counter <= 4;
 						end
-						else if (cyctype_dir[3:2] == 2'b01) begin /* memory */
+						else if (lpc_ad[3:2] == 2'b01) begin /* memory */
 							state <= address;
 							counter <= 8;
 						end
