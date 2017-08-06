@@ -21,14 +21,29 @@ To syncronize between lpc and usb it used a internal ring-buffer. The internal m
 # what connectors are used on the IceStick?
 
 - all 5 leds
-- pmod 2x6 (digilent connector)
 ```
-	lpc_ad[0] 1 7  reserved
-	lpc_ad[1] 2 8  lpc_reset
-	lpc_ad[2] 3 9  lpc_frame
-	lpc_ad[3] 4 10 lpc_clock
-	GND       5 11 GND
-	3.3V      6 12 3.3V
+	For orientation: the usb port points south:
+	green overflow_led
+	north ~lpc_frame
+	west  lpc_clock
+	east  ~lpc_reset
+	south valid_lpc_output_led
+```
+
+overflow_led when internal buffer is full. No more LPC frames are decoded
+valid_lpc_output_led will glow when one lpc frame was succesful decoded
+
+- J1 connector
+```
+	VCC 3.3|NC 1
+	GND        2
+	lpc_clock  3
+	lpc_ad[0]  4
+	lpc_ad[1]  5
+	lpc_ad[2]  6
+	lpc_ad[3]  7
+	lpc_frame  8
+	lpc_reset  9
 ```
 - uart output over the ftdi
 
