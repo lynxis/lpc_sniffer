@@ -44,7 +44,7 @@ module lpc(
 			counter <= 1;
 		end
 		else begin
-			if (counter == 1)
+			if (counter != 1)
 				counter <= counter - 1;
 			else
 				case (state)
