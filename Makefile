@@ -31,7 +31,7 @@ test/helloworld_tb.vvp: test/helloworld_tb.v test/helloworld.v mem2serial.v ring
 
 test/helloworld.bin: test/helloworld.v mem2serial.v ringbuffer.v buffer.v uart_tx.v power_on_reset.v test/helloworldwriter.v test/helloworld.pcf
 	yosys -p "synth_ice40 -blif test/helloworld.blif" test/helloworld.v mem2serial.v ringbuffer.v buffer.v uart_tx.v power_on_reset.v test/helloworldwriter.v
-	arachne-pnr -d 1k -p test/helloworld.pcf test/helloworld.blif -o helloworld.txt
+	arachne-pnr -d 1k -p test/helloworld.pcf test/helloworld.blif -o test/helloworld.txt
 	icepack test/helloworld.txt test/helloworld.bin
 
 test/helloonechar.bin: test/helloonechar.v uart_tx.v power_on_reset.v test/helloonechar.pcf
