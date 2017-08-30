@@ -1,6 +1,6 @@
 `timescale 1 ns / 100 ps
 
-module top_tb #(parameter CLOCK_FREQ = 4800, parameter BAUD_RATE = 1200) ();
+module top_tb #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 1200) ();
 
 	reg [3:0] lpc_ad;
 	reg lpc_clock;
@@ -15,25 +15,25 @@ module top_tb #(parameter CLOCK_FREQ = 4800, parameter BAUD_RATE = 1200) ();
 	wire overflow_led;
 
 	always
-		#1 ext_clock = ~ext_clock;
+		#3 ext_clock = ~ext_clock;
 	always
 		#1 lpc_clock = ~lpc_clock;
 
 	initial begin
 		$dumpfile ("top_tb.vcd");
 		$dumpvars (0, top_tb);
-		#500000 $finish;
+		#5000000 $finish;
 	end
 
 	initial begin
 		ext_clock = 0;
 		lpc_clock = 0;
 		lpc_frame = 1;
-		#4;
+		#10;
 		lpc_reset = 0;
-		#8;
+		#10;
 		lpc_reset = 1;
-		#4
+		#10;
 
 		/* writing LPC: io write 0x12 to 0x60 */
 		@(posedge lpc_clock);
@@ -195,6 +195,5 @@ module top_tb #(parameter CLOCK_FREQ = 4800, parameter BAUD_RATE = 1200) ();
 			.lpc_clock_led(lpc_clock_led),
 			.lpc_frame_led(lpc_frame_led),
 			.lpc_reset_led(lpc_reset_led),
-			.uart_tx_led(uart_tx_led),
 			.overflow_led(overflow_led));
 endmodule
