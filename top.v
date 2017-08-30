@@ -15,13 +15,15 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	/* power on reset */
 	wire reset;
 
-	/* lpc -> lpc2mem */
+	/* lpc */
 	wire [3:0] dec_cyctype_dir;
 	wire [31:0] dec_addr;
 	wire [7:0] dec_data;
 
-	/* lpc2mem -> memory */
+	/* bufferdomain*/
+	wire [47:0] lpc_data;
 	wire [47:0] write_data;
+	wire lpc_data_enable;
 
 	/* ring buffer */
 	wire read_clock_enable;
@@ -51,12 +53,21 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.out_cyctype_dir(dec_cyctype_dir),
 		.out_addr(dec_addr),
 		.out_data(dec_data),
-		.out_clock_enable(write_clock_enable));
+		.out_clock_enable(lpc_data_enable));
 
-	assign write_data[47:16] = dec_addr;
-	assign write_data[15:8] = dec_data;
-	assign write_data[7:4] = 0;
-	assign write_data[3:0] = dec_cyctype_dir;
+	bufferdomain #(.AW(48))
+		BUFFERDOMAIN(
+			.input_data(lpc_data),
+			.input_enable(lpc_data_enable),
+			.reset(reset),
+			.clock(ext_clock),
+			.output_data(write_data),
+			.output_enable(write_clock_enable));
+
+	assign lpc_data[47:16] = dec_addr;
+	assign lpc_data[15:8] = dec_data;
+	assign lpc_data[7:4] = 0;
+	assign lpc_data[3:0] = dec_cyctype_dir;
 
 	ringbuffer #(.AW(10), .DW(48))
 		RINGBUFFER (
