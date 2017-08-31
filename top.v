@@ -50,21 +50,6 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.clock(ext_clock),
 		.reset(reset));
 
-	SB_GB AD0(
-		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_ad[0]),
-		.GLOBAL_BUFFER_OUTPUT(lpc_ad_buffered[0]));
-	SB_GB AD1(
-		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_ad[1]),
-		.GLOBAL_BUFFER_OUTPUT(lpc_ad_buffered[1]));
-
-	SB_GB AD2(
-		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_ad[2]),
-		.GLOBAL_BUFFER_OUTPUT(lpc_ad_buffered[2]));
-
-	SB_GB AD3(
-		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_ad[3]),
-		.GLOBAL_BUFFER_OUTPUT(lpc_ad_buffered[3]));
-
 	SB_GB CLOCK(
 		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_clock),
 		.GLOBAL_BUFFER_OUTPUT(lpc_clock_buffered));
@@ -77,7 +62,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 
 
 	lpc LPC(
-		.lpc_ad(lpc_ad_buffered),
+		.lpc_ad(lpc_ad),
 		.lpc_clock(lpc_clock_buffered),
 		.lpc_frame(lpc_frame_buffered),
 		.lpc_reset(lpc_reset_buffered),
