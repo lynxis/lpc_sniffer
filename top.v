@@ -15,6 +15,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	/* power on reset */
 	wire reset;
 
+	wire lpc_clock_buffered;
 	/* lpc */
 	wire [3:0] dec_cyctype_dir;
 	wire [31:0] dec_addr;
@@ -44,10 +45,17 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.clock(ext_clock),
 		.reset(reset));
 
+	SB_GB CLOCK(
+		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_clock),
+		.GLOBAL_BUFFER_OUTPUT(lpc_clock_buffered));
+	SB_GB FRAME(
+		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_frame),
+		.GLOBAL_BUFFER_OUTPUT(lpc_frame_buffered));
+
 	lpc LPC(
 		.lpc_ad(lpc_ad),
-		.lpc_clock(lpc_clock),
-		.lpc_frame(lpc_frame),
+		.lpc_clock(lpc_clock_buffered),
+		.lpc_frame(lpc_frame_buffered),
 		.lpc_reset(lpc_reset),
 		.reset(reset),
 		.out_cyctype_dir(dec_cyctype_dir),
@@ -104,10 +112,10 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.reset(reset),
 		.clock(ext_clock),
 		.led(valid_lpc_output_led),
-		.trigger(write_clock_enable));
+		.trigger(lpc_data_enable));
 
-	assign lpc_clock_led = lpc_clock;
-	assign lpc_frame_led = ~lpc_frame;
-	assign lpc_reset_led = ~lpc_reset;
+	assign lpc_clock_led = lpc_clock_buffered;
+	assign lpc_frame_led = ~lpc_frame_bufferd;
+	assign lpc_reset_led = 1;
 	assign overflow_led = overflow;
 endmodule
