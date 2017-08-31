@@ -15,7 +15,12 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 	/* power on reset */
 	wire reset;
 
+	/* buffering */
+	wire [3:0] lpc_ad_buffered;
 	wire lpc_clock_buffered;
+	wire lpc_frame_buffered;
+	wire lpc_reset_buffered;
+
 	/* lpc */
 	wire [3:0] dec_cyctype_dir;
 	wire [31:0] dec_addr;
@@ -45,18 +50,37 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.clock(ext_clock),
 		.reset(reset));
 
+	SB_GB AD0(
+		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_ad[0]),
+		.GLOBAL_BUFFER_OUTPUT(lpc_ad_buffered[0]));
+	SB_GB AD1(
+		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_ad[1]),
+		.GLOBAL_BUFFER_OUTPUT(lpc_ad_buffered[1]));
+
+	SB_GB AD2(
+		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_ad[2]),
+		.GLOBAL_BUFFER_OUTPUT(lpc_ad_buffered[2]));
+
+	SB_GB AD3(
+		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_ad[3]),
+		.GLOBAL_BUFFER_OUTPUT(lpc_ad_buffered[3]));
+
 	SB_GB CLOCK(
 		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_clock),
 		.GLOBAL_BUFFER_OUTPUT(lpc_clock_buffered));
+	SB_GB RESET(
+		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_reset),
+		.GLOBAL_BUFFER_OUTPUT(lpc_reset_buffered));
 	SB_GB FRAME(
 		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_frame),
 		.GLOBAL_BUFFER_OUTPUT(lpc_frame_buffered));
 
+
 	lpc LPC(
-		.lpc_ad(lpc_ad),
+		.lpc_ad(lpc_ad_buffered),
 		.lpc_clock(lpc_clock_buffered),
 		.lpc_frame(lpc_frame_buffered),
-		.lpc_reset(lpc_reset),
+		.lpc_reset(lpc_reset_buffered),
 		.reset(reset),
 		.out_cyctype_dir(dec_cyctype_dir),
 		.out_addr(dec_addr),
@@ -115,7 +139,7 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 115200)
 		.trigger(lpc_data_enable));
 
 	assign lpc_clock_led = lpc_clock_buffered;
-	assign lpc_frame_led = ~lpc_frame_bufferd;
+	assign lpc_frame_led = ~lpc_frame_buffered;
 	assign lpc_reset_led = 1;
 	assign overflow_led = overflow;
 endmodule
