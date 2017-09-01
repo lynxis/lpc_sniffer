@@ -123,8 +123,8 @@ module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 2000000)
 		.led(valid_lpc_output_led),
 		.trigger(lpc_data_enable));
 
-	assign lpc_clock_led = lpc_clock_buffered;
-	assign lpc_frame_led = ~lpc_frame_buffered;
+	assign lpc_clock_led = 0;
+	assign lpc_frame_led = 0;
 	assign lpc_reset_led = 1;
 	assign overflow_led = overflow;
 endmodule
