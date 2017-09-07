@@ -1,4 +1,4 @@
-module top #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 2000000)
+module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 2_000_000)
 (
 	input [3:0] lpc_ad,
 	input lpc_clock,
