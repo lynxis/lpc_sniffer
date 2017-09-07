@@ -8,7 +8,9 @@ if len(sys.argv) != 2:
     print("read_serial /dev/ttyUSB4")
     sys.exit(1)
 
-ser = serial.Serial(sys.argv[1], 115200)
+# ser = serial.Serial(sys.argv[1], 115200)
+# ser = serial.Serial(sys.argv[1], 2_000_000)
+ser = serial.Serial(sys.argv[1], 921600)
 while True:
     line = ser.readline()
     line = line.strip(b'\r\n')
