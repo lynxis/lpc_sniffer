@@ -16,10 +16,7 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 2_000_000)
 	wire reset;
 
 	/* buffering */
-	wire [3:0] lpc_ad_buffered;
-	wire lpc_clock_buffered;
-	wire lpc_frame_buffered;
-	wire lpc_reset_buffered;
+	wire [3:0] lpc_ad;
 
 	/* lpc */
 	wire [3:0] dec_cyctype_dir;
@@ -50,22 +47,11 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 2_000_000)
 		.clock(ext_clock),
 		.reset(reset));
 
-	SB_GB CLOCK(
-		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_clock),
-		.GLOBAL_BUFFER_OUTPUT(lpc_clock_buffered));
-	SB_GB RESET(
-		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_reset),
-		.GLOBAL_BUFFER_OUTPUT(lpc_reset_buffered));
-	SB_GB FRAME(
-		.USER_SIGNAL_TO_GLOBAL_BUFFER(lpc_frame),
-		.GLOBAL_BUFFER_OUTPUT(lpc_frame_buffered));
-
-
 	lpc LPC(
 		.lpc_ad(lpc_ad),
-		.lpc_clock(lpc_clock_buffered),
-		.lpc_frame(lpc_frame_buffered),
-		.lpc_reset(lpc_reset_buffered),
+		.lpc_clock(lpc_clock),
+		.lpc_frame(lpc_frame),
+		.lpc_reset(lpc_reset),
 		.reset(reset),
 		.out_cyctype_dir(dec_cyctype_dir),
 		.out_addr(dec_addr),
