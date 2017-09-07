@@ -44,14 +44,20 @@ module lpc(
 			counter <= 1;
 		end
 		else begin
-			if (counter != 1)
+			if (~lpc_frame) begin
+				counter <= 1;
+
+				if (lpc_ad == 4'b0000) /* start condition */
+					state <= cycle_dir;
+				else
+					state <= idle; /* abort */
+			end
+			else if (counter != 1)
 				counter <= counter - 1;
 			else
 				case (state)
-					idle:
-						// wait for start condition
-						if (~lpc_frame && lpc_ad == 4'b0000)
-							state <= cycle_dir;
+					idle: begin
+					end
 					cycle_dir: begin
 						if (lpc_ad[3:2] == 2'b00) begin /* i/o */
 							state <= address;
