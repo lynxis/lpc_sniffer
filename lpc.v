@@ -153,10 +153,10 @@ module lpc(
 			read_data: begin
 				case (counter)
 					2:
-						data[7:4] <= lpc_ad[3:0];
+						data[3:0] <= lpc_ad[3:0];
 					1: begin
 						out_clock_enable <= 1;
-						data[3:0] <= lpc_ad[3:0];
+						data[7:4] <= lpc_ad[3:0];
 					end
 				endcase
 			end
