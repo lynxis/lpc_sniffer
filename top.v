@@ -43,6 +43,8 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 2_000_000)
 	wire uart_clock_enable;
 	wire uart_clock;
 
+	wire no_lpc_reset;
+
 	power_on_reset POR(
 		.clock(ext_clock),
 		.reset(reset));
@@ -51,7 +53,7 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 2_000_000)
 		.lpc_ad(lpc_ad),
 		.lpc_clock(lpc_clock),
 		.lpc_frame(lpc_frame),
-		.lpc_reset(lpc_reset),
+		.lpc_reset(no_lpc_reset),
 		.reset(reset),
 		.out_cyctype_dir(dec_cyctype_dir),
 		.out_addr(dec_addr),
@@ -112,5 +114,6 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 2_000_000)
 	assign lpc_clock_led = 0;
 	assign lpc_frame_led = 0;
 	assign lpc_reset_led = 1;
+	assign no_lpc_reset = 1;
 	assign overflow_led = overflow;
 endmodule
