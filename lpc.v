@@ -19,7 +19,8 @@ module lpc(
 	output [3:0] out_cyctype_dir,
 	output [31:0] out_addr,
 	output [7:0] out_data,
-	output out_clock_enable);
+	output out_sync_timeout,
+	output reg out_clock_enable);
 
 	/* type and direction. same as in LPC Spec 1.1 */
 
@@ -68,6 +69,16 @@ module lpc(
                     data[3:0] <= data[7:4];
                 end
 
+		sync: begin
+			if (lpc_ad == 4'b0000)
+				if (cyctype_dir[3] == 0) begin /* i/o or memory */
+					state <= read_data;
+					data <= 0;
+					counter <= 2;
+				end else
+					state <= idle; /* unsupported dma or reserved */
+			end
+
                 default:
                     begin end
                 endcase
@@ -77,6 +88,8 @@ module lpc(
 
 					cycle_dir: begin
 						out_clock_enable <= 0;
+						out_sync_timeout <= 0;
+
 						if (lpc_ad[3:2] == 2'b00) begin /* i/o */
 							state <= address;
 							counter <= 4;
@@ -99,16 +112,17 @@ module lpc(
 						counter <= 2;
 					end
 
-					tar: state <= sync;
+					tar: begin
+						state <= sync;
+						counter <= 1;
+					end
 
 					sync: begin
-						if (lpc_ad == 4'b0000)
-							if (cyctype_dir[3] == 0) begin /* i/o or memory */
-								state <= read_data;
-								data <= 0;
-								counter <= 2;
-							end else
-								state <= idle; /* unsupported dma or reserved */
+						if (lpc_ad == 4'b1111) begin
+							out_sync_timeout <= 1;
+							out_clock_enable <= 1;
+							state <= idle;
+						end
 					end
 
 					read_data: begin
@@ -120,8 +134,8 @@ module lpc(
 
 					abort: counter <= 2;
 					endcase
-                end
-            end
+				end
+			end
 		end
 	end
 

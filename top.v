@@ -22,6 +22,7 @@ module top #(parameter CLOCK_FREQ = 33_000_000, parameter BAUD_RATE = 921600)
 	wire [3:0] dec_cyctype_dir;
 	wire [31:0] dec_addr;
 	wire [7:0] dec_data;
+	wire dec_sync_timeout;
 
 	/* bufferdomain*/
 	wire [47:0] lpc_data;
@@ -67,6 +68,7 @@ module top #(parameter CLOCK_FREQ = 33_000_000, parameter BAUD_RATE = 921600)
 		.out_cyctype_dir(dec_cyctype_dir),
 		.out_addr(dec_addr),
 		.out_data(dec_data),
+		.out_sync_timeout(dec_sync_timeout),
 		.out_clock_enable(lpc_data_enable));
 
 	bufferdomain #(.AW(48))
@@ -80,7 +82,8 @@ module top #(parameter CLOCK_FREQ = 33_000_000, parameter BAUD_RATE = 921600)
 
 	assign lpc_data[47:16] = dec_addr;
 	assign lpc_data[15:8] = dec_data;
-	assign lpc_data[7:4] = 0;
+	assign lpc_data[7:5] = 0;
+	assign lpc_data[4] = dec_sync_timeout;
 	assign lpc_data[3:0] = dec_cyctype_dir;
 
 	ringbuffer #(.AW(10), .DW(48))
@@ -120,7 +123,9 @@ module top #(parameter CLOCK_FREQ = 33_000_000, parameter BAUD_RATE = 921600)
 		.led(valid_lpc_output_led),
 		.trigger(trigger_port));
 
-	assign trigger_port = dec_addr == 32'h80 && dec_data == 8'h34 && dec_cyctype_dir == 4'b0010;
+	//assign trigger_port = dec_addr == 32'h80 && dec_data == 8'h34 && dec_cyctype_dir == 4'b0010;
+	//assign trigger_port = dec_addr == 32'h3f9 && dec_cyctype_dir == 4'b0100;
+	assign trigger_port = dec_cyctype_dir == 4'b0100;
 
 	assign lpc_clock_led = 0;
 	assign lpc_frame_led = 0;

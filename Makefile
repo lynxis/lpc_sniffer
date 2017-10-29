@@ -20,8 +20,8 @@ ringbuffer.vvp: ringbuffer_tb.v ringbuffer.v buffer.v
 uart_tx_tb.vvp: uart_tx_tb.v uart_tx.v
 	iverilog -o uart_tx_tb.vvp uart_tx_tb.v uart_tx.v
 
-top_tb.vpp: top_tb.v top.v buffer.v bufferdomain.v lpc.v mem2serial.v ringbuffer.v uart_tx.v power_on_reset.v trigger_led.v
-	iverilog -o top_tb.vpp top_tb.v top.v buffer.v bufferdomain.v lpc.v mem2serial.v ringbuffer.v uart_tx.v power_on_reset.v trigger_led.v
+top_tb.vpp: top_tb.v top.v buffer.v bufferdomain.v lpc.v mem2serial.v ringbuffer.v uart_tx.v power_on_reset.v trigger_led.v pll.v ./test/sb_pll40_core_sim.v
+	iverilog -o top_tb.vpp top_tb.v top.v buffer.v bufferdomain.v lpc.v mem2serial.v ringbuffer.v uart_tx.v power_on_reset.v trigger_led.v pll.v ./test/sb_pll40_core_sim.v
 
 test/helloonechar_tb.vvp: uart_tx_tb.v uart_tx.v test/helloonechar_tb.v power_on_reset.v
 	iverilog -o test/helloonechar_tb.vvp test/helloonechar_tb.v uart_tx.v power_on_reset.v
