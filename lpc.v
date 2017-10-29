@@ -19,7 +19,7 @@ module lpc(
 	output [3:0] out_cyctype_dir,
 	output [31:0] out_addr,
 	output [7:0] out_data,
-	output reg out_clock_enable);
+	output out_clock_enable);
 
 	/* type and direction. same as in LPC Spec 1.1 */
 
@@ -51,24 +51,27 @@ module lpc(
 					state <= cycle_dir;
 				else
 					state <= idle; /* abort */
-			end else
-				if (counter != 1) begin
-					counter <= counter - 1;
+            end else begin
+                counter <= counter - 1;
 
-					case (state)
-					cycle_dir:
-						cyctype_dir <= lpc_ad;
+                case (state)
+                cycle_dir:
+                    cyctype_dir <= lpc_ad;
 
-					address:
-						addr[31:0] <= addr[27:0] & lpc_ad;
+                address: begin
+                    addr[31:4] <= addr[27:0];
+                    addr[3:0] <= lpc_ad;
+                end
 
-					read_data:
-						data[7:0] <= lpc_ad & data[7:4];
+                read_data: begin
+                    data[7:4] <= lpc_ad;
+                    data[3:0] <= data[7:4];
+                end
 
-					default:
-						begin end
-					endcase
-				end else
+                default:
+                    begin end
+                endcase
+				if (counter == 1) begin
 					case (state)
 					idle: begin end
 
@@ -112,11 +115,13 @@ module lpc(
 
 					abort: counter <= 2;
 					endcase
+                end
+            end
 		end
 	end
 
 	assign out_cyctype_dir = cyctype_dir;
 	assign out_data = data;
 	assign out_addr = addr;
-	assign out_clock_enable = reset && state == read_data && counter == 1;
+	assign out_clock_enable = reset && state == read_data && counter == 0;
 endmodule
