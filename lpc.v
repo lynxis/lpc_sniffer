@@ -76,6 +76,7 @@ module lpc(
 					idle: begin end
 
 					cycle_dir: begin
+						out_clock_enable <= 0;
 						if (lpc_ad[3:2] == 2'b00) begin /* i/o */
 							state <= address;
 							counter <= 4;
@@ -100,7 +101,7 @@ module lpc(
 
 					tar: state <= sync;
 
-					sync:
+					sync: begin
 						if (lpc_ad == 4'b0000)
 							if (cyctype_dir[3] == 0) begin /* i/o or memory */
 								state <= read_data;
@@ -108,8 +109,12 @@ module lpc(
 								counter <= 2;
 							end else
 								state <= idle; /* unsupported dma or reserved */
+					end
 
-					read_data: state <= idle;
+					read_data: begin
+						out_clock_enable <= 1;
+						state <= idle;
+					end
 
 					/* todo: missing TAR after read_data */
 
@@ -123,5 +128,4 @@ module lpc(
 	assign out_cyctype_dir = cyctype_dir;
 	assign out_data = data;
 	assign out_addr = addr;
-	assign out_clock_enable = reset && state == read_data && counter == 0;
 endmodule

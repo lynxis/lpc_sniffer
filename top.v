@@ -1,4 +1,4 @@
-module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 921600)
+module top #(parameter CLOCK_FREQ = 33_000_000, parameter BAUD_RATE = 921600)
 (
 	input [3:0] lpc_ad,
 	input lpc_clock,
@@ -46,8 +46,16 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 921600)
 	wire trigger_port;
 	wire no_lpc_reset;
 
+	wire main_clock;
+	wire pll_locked;
+
+	pll PLL(.clock_in(ext_clock),
+		.clock_out(main_clock),
+		.locked(pll_locked));
+
 	power_on_reset POR(
-		.clock(ext_clock),
+		.pll_locked(pll_locked),
+		.clock(main_clock),
 		.reset(reset));
 
 	lpc LPC(
@@ -66,7 +74,7 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 921600)
 			.input_data(lpc_data),
 			.input_enable(lpc_data_enable),
 			.reset(reset),
-			.clock(ext_clock),
+			.clock(main_clock),
 			.output_data(write_data),
 			.output_enable(write_clock_enable));
 
@@ -78,7 +86,7 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 921600)
 	ringbuffer #(.AW(10), .DW(48))
 		RINGBUFFER (
 			.reset(reset),
-			.clock(ext_clock),
+			.clock(main_clock),
 			.write_clock_enable(write_clock_enable),
 			.read_clock_enable(read_clock_enable),
 			.read_data(read_data),
@@ -88,7 +96,7 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 921600)
 
 	mem2serial MEM_SERIAL(
 		.reset(reset),
-		.clock(ext_clock),
+		.clock(main_clock),
 		.read_empty(empty),
 		.read_clock_enable(read_clock_enable),
 		.read_data(read_data),
@@ -103,12 +111,12 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 921600)
 			.reset(reset),
 			.ready(uart_ready),
 			.tx(uart_tx_pin),
-			.clock(ext_clock),
+			.clock(main_clock),
 			.uart_clock(uart_clock));
 
 	trigger_led TRIGGERLPC(
 		.reset(reset),
-		.clock(ext_clock),
+		.clock(main_clock),
 		.led(valid_lpc_output_led),
 		.trigger(trigger_port));
 

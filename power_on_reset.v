@@ -1,4 +1,7 @@
-module power_on_reset(input clock, output reg reset);
+module power_on_reset(
+	input pll_locked,
+	input clock,
+	output reg reset);
 
 reg [31:0] counter = 32'h2;
 
@@ -10,7 +13,7 @@ always @(*) begin
 end
 
 always @(negedge clock) begin
-	if (counter != 0)
+	if (counter != 0 && pll_locked)
 		counter <= counter - 1;
 end
 
