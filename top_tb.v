@@ -109,6 +109,8 @@ module top_tb #(parameter CLOCK_FREQ = 12000000, parameter BAUD_RATE = 1200) ();
 		@(posedge lpc_clock);
 		@(posedge lpc_clock);
 
+        $finish;
+
 		/* sync */
 		lpc_ad = 'h0;
 		@(posedge lpc_clock);

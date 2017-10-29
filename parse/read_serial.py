@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from binascii import hexlify
 import sys
 import serial
 import parse
@@ -14,6 +15,7 @@ ser = serial.Serial(sys.argv[1], 921600)
 while True:
     line = ser.readline()
     line = line.strip(b'\r\n')
+    print(hexlify(line))
     lpc = parse.parse_line(line)
     if not lpc:
         continue
