@@ -51,130 +51,72 @@ module lpc(
 					state <= cycle_dir;
 				else
 					state <= idle; /* abort */
-			end
-			else if (counter != 1)
-				counter <= counter - 1;
-			else
-				case (state)
-					idle: begin
-					end
+			end else
+				if (counter != 1) begin
+					counter <= counter - 1;
+
+					case (state)
+					cycle_dir:
+						cyctype_dir <= lpc_ad;
+
+					address:
+						addr[31:0] <= addr[27:0] & lpc_ad;
+
+					read_data:
+						data[7:0] <= lpc_ad & data[7:4];
+
+					default:
+						begin end
+					endcase
+				end else
+					case (state)
+					idle: begin end
+
 					cycle_dir: begin
 						if (lpc_ad[3:2] == 2'b00) begin /* i/o */
 							state <= address;
 							counter <= 4;
+							addr <= 0;
 						end
 						else if (lpc_ad[3:2] == 2'b01) begin /* memory */
 							state <= address;
 							counter <= 8;
-						end
-						else begin /* dma or reserved not yet supported */
+							addr <= 0;
+						end else begin /* dma or reserved not yet supported */
 							state <= idle;
 						end
 					end
+
 					address: begin
-						if (cyctype_dir[1]) begin /* write memory or i/o */
+						if (cyctype_dir[1]) /* write memory or i/o */
 							state <= read_data;
-							counter <= 2;
-						end
-						else begin /* read memory or i/o */
+						else /* read memory or i/o */
 							state <= tar;
-							counter <= 2;
-						end
+						counter <= 2;
 					end
-					tar: begin
-						state <= sync;
-					end
+
+					tar: state <= sync;
+
 					sync:
 						if (lpc_ad == 4'b0000)
 							if (cyctype_dir[3] == 0) begin /* i/o or memory */
 								state <= read_data;
+								data <= 0;
 								counter <= 2;
-							end
-							else
+							end else
 								state <= idle; /* unsupported dma or reserved */
-					read_data: begin
-						state <= idle;
-					end
+
+					read_data: state <= idle;
+
 					/* todo: missing TAR after read_data */
 
-					abort: begin /* lpc abort */
-						counter <= 2;
-					end
-				endcase
+					abort: counter <= 2;
+					endcase
 		end
 	end
 
-	always @(negedge lpc_clock or negedge reset) begin
-	if (~reset)
-		out_clock_enable <= 0;
-	else
-		case (state)
-			// wait for start segment
-			idle: begin
-				out_clock_enable <= 0;
-			end
-
-			cycle_dir: begin
-				cyctype_dir <= lpc_ad;
-			end
-			address: begin
-				case (cyctype_dir[3:2])
-				2'b00: begin /* 16 bit i/o */
-					addr[31:16] <= 0;
-					case (counter)
-						4:
-							addr[15:12] <= lpc_ad;
-						3:
-							addr[11:8] <= lpc_ad;
-						2:
-							addr[7:4] <= lpc_ad;
-						1:
-							addr[3:0] <= lpc_ad;
-					endcase
-				end
-				2'b10: begin /* 32 bit memory */
-					case (counter)
-						8:
-							addr[31:28] <= lpc_ad;
-						7:
-							addr[27:24] <= lpc_ad;
-						6:
-							addr[23:20] <= lpc_ad;
-						5:
-							addr[19:16] <= lpc_ad;
-						4:
-							addr[15:12] <= lpc_ad;
-						3:
-							addr[11:8] <= lpc_ad;
-						2:
-							addr[7:4] <= lpc_ad;
-						1:
-							addr[3:0] <= lpc_ad;
-					endcase
-				end
-				default: begin end
-				endcase
-			end
-
-			read_data: begin
-				case (counter)
-					2:
-						data[3:0] <= lpc_ad[3:0];
-					1: begin
-						out_clock_enable <= 1;
-						data[7:4] <= lpc_ad[3:0];
-					end
-				endcase
-			end
-
-			idle: begin
-				out_clock_enable <= 0;
-			end
-
-			default: begin end
-		endcase
-	end
 	assign out_cyctype_dir = cyctype_dir;
 	assign out_data = data;
 	assign out_addr = addr;
+	assign out_clock_enable = reset && state == read_data && counter == 1;
 endmodule
