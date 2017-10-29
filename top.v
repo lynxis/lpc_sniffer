@@ -43,6 +43,7 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 921600)
 	wire uart_clock_enable;
 	wire uart_clock;
 
+	wire trigger_port;
 	wire no_lpc_reset;
 
 	power_on_reset POR(
@@ -109,7 +110,9 @@ module top #(parameter CLOCK_FREQ = 12_000_000, parameter BAUD_RATE = 921600)
 		.reset(reset),
 		.clock(ext_clock),
 		.led(valid_lpc_output_led),
-		.trigger(lpc_data_enable));
+		.trigger(trigger_port));
+
+	assign trigger_port = dec_addr == 32'h80 && dec_data == 8'h34 && dec_cyctype_dir == 4'b0010;
 
 	assign lpc_clock_led = 0;
 	assign lpc_frame_led = 0;
