@@ -17,19 +17,8 @@ module ringbuffer #(parameter AW = 8, DW = 48)
 	wire mem_read_clock_enable;
 	wire mem_write_clock_enable;
 
-	always @(*) begin
-		if (read_addr == write_addr)
-			empty = 1;
-		else
-			empty = 0;
-
-		// TODO: only overflow when written once to this address
-		if (next_write_addr == read_addr)
-			overflow = 1;
-		else
-			overflow = 0;
-
-	end
+	assign empty = read_addr == write_addr;
+	assign overflow = next_write_addr == read_addr;
 
 	always @(negedge reset or negedge clock) begin
 		if (~reset) begin
