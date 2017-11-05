@@ -6,7 +6,7 @@ $(NAME).bin: $(NAME).pcf $(NAME).v $(DEPS)
 	yosys -p "synth_ice40 -blif $(NAME).blif" $(NAME).v $(DEPS)
 	arachne-pnr -d 1k -p $(NAME).pcf $(NAME).blif -o $(NAME).txt
 	icepack $(NAME).txt $(NAME).bin
-
+	cp $(NAME).bin lpc_sniffer.bin
 
 buffer.vvp: buffer_tb.v buffer.v
 	iverilog -o buffer_tb.vvp buffer_tb.v buffer.v
