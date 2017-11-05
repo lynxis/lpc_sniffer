@@ -5,7 +5,10 @@ module top #(parameter CLOCK_FREQ = 33_000_000, parameter BAUD_RATE = 921600)
 	input lpc_frame,
 	input lpc_reset,
 	input ext_clock,
-	output uart_tx_pin,
+	input fscts,
+	input fsdo,
+	output fsdi,
+	output fsclk,
 	output lpc_clock_led,
 	output lpc_frame_led,
 	output lpc_reset_led,
@@ -107,15 +110,17 @@ module top #(parameter CLOCK_FREQ = 33_000_000, parameter BAUD_RATE = 921600)
 		.uart_ready(uart_ready),
 		.uart_data(uart_data));
 
-	uart_tx #(.CLOCK_FREQ(CLOCK_FREQ), .BAUD_RATE(BAUD_RATE))
-		SERIAL (
-			.read_data(uart_data),
-			.read_clock_enable(uart_clock_enable),
-			.reset(reset),
-			.ready(uart_ready),
-			.tx(uart_tx_pin),
-			.clock(main_clock),
-			.uart_clock(uart_clock));
+	wire [1:0] state;
+	ftdi SERIAL (
+		.read_data(uart_data),
+		.read_clock_enable(uart_clock_enable),
+		.reset(reset),
+		.ready(uart_ready),
+		.fsdi(fsdi),
+		.fscts(fscts),
+		.state(state),
+		.clock(main_clock));
+	assign fsclk = main_clock;
 
 	trigger_led TRIGGERLPC(
 		.reset(reset),
