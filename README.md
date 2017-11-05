@@ -1,37 +1,20 @@
 # lpc sniffer (low pin count) for ice40 stick
 
-Connect wire to the lpc sniffer and read out via the ftdi serial interface
+Turn the ice40 stick into a LPC sniffer.
 
-# format of the serial protocol is
+# features
 
-- Start: 2 byte 0xff23
-- Type: 1 byte 0x11 (same as in the lpc)
-- Addr: 4 byte (even for i/o, i/o has 16bit addr, memory 32 bit)
-- data: 1 byte
+- i/o read + writes
+- memory read + writes
+- sync errors
 
-# in memory layout
+# How to use
 
-To syncronize between lpc and usb it used a internal ring-buffer. The internal memory layout is:
-
-- Type: 1 byte 0x11 (same as in the lpc)
-- Addr: 4 byte (even for i/o, i/o has 16bit addr, memory 32 bit)
-- data: 1 byte
-- waste: 2 byte (unused)
+1. programm top.bin into your ice40 by `iceprog lpc_sniffer.bin`
+1. connect the LPC bus
+1. python3 ./parse/read_serial.py /dev/ttyUSB1
 
 # what connectors are used on the IceStick?
-
-- all 5 leds
-```
-	For orientation: the usb port points south:
-	green overflow_led
-	north ~lpc_frame
-	west  lpc_clock
-	east  ~lpc_reset
-	south valid_lpc_output_led
-```
-
-overflow_led when internal buffer is full. No more LPC frames are decoded
-valid_lpc_output_led will glow when one lpc frame was succesful decoded
 
 - J1 connector
 ```
@@ -46,4 +29,53 @@ valid_lpc_output_led will glow when one lpc frame was succesful decoded
 	lpc_reset  9
 ```
 - uart output over the ftdi
+
+## LEDs
+
+```
+	For orientation: the usb port points south:
+	green in the middle: overflow_led
+```
+
+overflow\_led when internal buffer is full. No more LPC frames are decoded
+
+# Uart protocol
+
+The LPC sniffer will write out frames onto the **second** uart of FTDI with 921600 baud.
+
+## format
+
+- 4 byte: address
+- 1 byte: data
+- 1 byte: 0-3bits: direction+type, 4-7: errorcode
+- 2 byte: '\r\n'
+
+## error codes
+
+An error code is decoded in 4 bits
+- 0001 - sync timeout.
+
+# Internal documentation
+
+A LPC frame will:
+
+1. decoded by the LPC decoder
+2. saved into the internal memory
+3. padded by \r\n
+4. written onto uart
+
+## in memory layout
+
+The internal memory is used as 48bit addressable memory.
+48 bit is exact one lpc frame
+
+- 4 byte: address
+- 1 byte: data
+- 1 byte: direction/type + error code
+
+## internal buffer
+
+The LPC sniffer is using an internal buffer. When the internal buffer
+is full, new frames will be discarded. The green LED in the middle will turn on.
+The internal buffer can save up to 2\*\*10 lpc frames (1024).
 
