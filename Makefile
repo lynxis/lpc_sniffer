@@ -1,6 +1,6 @@
 
 NAME=top
-DEPS=buffer.v bufferdomain.v lpc.v mem2serial.v ringbuffer.v uart_tx.v power_on_reset.v trigger_led.v pll.v
+DEPS=buffer.v bufferdomain.v lpc.v mem2serial.v ringbuffer.v uart_tx.v power_on_reset.v trigger_led.v pll.v ftdi.v
 
 $(NAME).bin: $(NAME).pcf $(NAME).v $(DEPS)
 	yosys -p "synth_ice40 -blif $(NAME).blif" $(NAME).v $(DEPS)
