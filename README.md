@@ -13,7 +13,7 @@ Turn the ice40 stick into a LPC sniffer.
 1. modify EEPROM of the FTDI and enable OPTO mode on Channel B
 1. programm top.bin into your ice40 by `iceprog lpc_sniffer.bin`
 1. connect the LPC bus
-1. python3 ./parse/read_serial.py /dev/ttyUSB1
+1. python3 `./parse/read_serial.py /dev/ttyUSB1`
 
 # what connectors are used on the IceStick?
 
