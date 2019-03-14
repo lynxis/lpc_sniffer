@@ -69,12 +69,7 @@ module mem2serial #(parameter AW = 8)
 							uart_data <= 'h0a;
 							state <= wait_write_trailer_done;
 						end
-						else if (write_pos == 1) begin
-							uart_clock_enable <= 1;
-							uart_data <= 'h0d;
-							state <= wait_write_trailer_done;
-						end
-						else if (write_pos >= 2) begin
+						else if (write_pos >= 1) begin
 							state <= idle;
 						end
 

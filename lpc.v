@@ -39,7 +39,7 @@ module lpc(
 	reg [31:0] addr;
 	reg [7:0] data;
 
-	always @(negedge lpc_clock or negedge lpc_reset) begin
+	always @(posedge lpc_clock or negedge lpc_reset) begin
 		if (~lpc_reset) begin
 			state <= idle;
 			counter <= 1;
@@ -48,7 +48,7 @@ module lpc(
 			if (~lpc_frame) begin
 				counter <= 1;
 
-				if (lpc_ad == 4'b0000) /* start condition */
+				if (lpc_ad == 4'b0101) /* start condition */
 					state <= cycle_dir;
 				else
 					state <= idle; /* abort */
@@ -95,21 +95,16 @@ module lpc(
 							counter <= 4;
 							addr <= 0;
 						end
-						else if (lpc_ad[3:2] == 2'b01) begin /* memory */
-							state <= address;
-							counter <= 8;
-							addr <= 0;
-						end else begin /* dma or reserved not yet supported */
+						else /* Don't care about anything other than I/O */
 							state <= idle;
-						end
 					end
 
 					address: begin
 						if (cyctype_dir[1]) /* write memory or i/o */
-							state <= read_data;
+                                                        state <= read_data;
 						else /* read memory or i/o */
 							state <= tar;
-						counter <= 2;
+                                                counter <= 2;
 					end
 
 					tar: begin
@@ -119,14 +114,18 @@ module lpc(
 
 					sync: begin
 						if (lpc_ad == 4'b1111) begin
-							out_sync_timeout <= 1;
-							out_clock_enable <= 1;
+                                                        if (addr == 32'h24) begin 
+                                                            out_sync_timeout <= 1;
+                                                            out_clock_enable <= 1;
+                                                        end
+
 							state <= idle;
 						end
 					end
 
 					read_data: begin
-						out_clock_enable <= 1;
+                                                if (addr == 32'h24)
+                                                    out_clock_enable <= 1;
 						state <= idle;
 					end
 
